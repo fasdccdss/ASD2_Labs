@@ -4,10 +4,20 @@ public class RecursionOne
 {
     private static double F(int i, int n, double x, ref double sum)
     {
-        double fi = (i == 1) ? 1.0: 
-        F(i - 1, n, x, ref sum) * (x * x) / (4.0 * (i - 1) * (i - 1) - 2.0 * (i - 1));
-        sum += fi;
+        double fi;
+
+        if (i == 1)
+        {
+            fi = 1;
+        }
+        else
+        {
+            fi = F(i - 1, n, x, ref sum) * (x * x) / (4.0 * (i - 1) * (i - 1) - 2.0 * (i - 1));
+        }
+        
         Console.WriteLine($"F({i}) result = {fi}");
+
+        sum += fi;
         return fi;
     }
 
@@ -64,6 +74,7 @@ public class RecursionThree
     {
         if (i == 1)
         {
+            Console.WriteLine($"F({i}) result = {1}");
             sum = 1.0;
             return 1.0;
         }
