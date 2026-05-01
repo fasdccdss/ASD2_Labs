@@ -19,19 +19,19 @@ public class CollectionChains
         for(int i = 0; i < n; i++)
         {
             int x = i + 1;
-            CheckForSwitch(x, 10, ref p);
             int y = p == true ? 1 : -1;
 
             list.AddLast(y);
+            
+            CheckForSwitch(x, 10, ref p);
         }
 
         return list;
     }
 
-    public static void ReArrange(LinkedList<int> list, bool p = true)
+    public static void Rearrange(LinkedList<int> list, bool p = true)
     {
         LinkedListNode<int> node = list.First;
-        LinkedListNode<int> nextNode = node.Next;
 
         LinkedList<int> savedNodes = new LinkedList<int>();
 
@@ -40,25 +40,28 @@ public class CollectionChains
 
         while (node != null)
         {
-            CheckForSwitch(i, steps, ref p);
+            LinkedListNode<int> nextNode = node.Next;
 
             if (p == false)
             {
-                LinkedListNode<int> save = node;
+                // 1*:
+                // you can't add a node that belonged to another list — even after removing it, 
+                // C# still tracks which list it came from and throws this exception. Use .Value
+                savedNodes.AddLast(node.Value);
                 list.Remove(node);
-                savedNodes.AddLast(save);
             }
-            if (p == true && i > steps)
+            else if (p == true && i > steps)
             {
                 // now we want to take the first node from savedNodes and 
                 // add it after the current node
                 // than we want to delete this node from savedNodes, so that we can sample the 
                 // next node in the same way
-                list.AddAfter(node, savedNodes.First);
+                list.AddAfter(node, savedNodes.First.Value); // same here a in issue 1*
                 savedNodes.Remove(savedNodes.First);
             }
 
-            Console.WriteLine($"element{i}: {node}");
+            Console.WriteLine($"element {i}: {node.Value}");
+            CheckForSwitch(i, steps, ref p);
             i++;
             node = nextNode;
         }
