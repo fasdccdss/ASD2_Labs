@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class CollectionChains
 {
-    private LinkedList<int> BuildDictionary(int n, bool p = true)
+    public static LinkedList<int> BuildList(int n, bool p = true)
     {
         if (n <= 0)
         {
@@ -20,8 +20,7 @@ public class CollectionChains
         {
             int x = i + 1;
             CheckForSwitch(x, 10, ref p);
-
-            int y = ListValue(x, 10, ref p);
+            int y = p == true ? 1 : -1;
 
             list.AddLast(y);
         }
@@ -29,41 +28,51 @@ public class CollectionChains
         return list;
     }
 
-    private int ListValue(int x, int y, ref bool p)
+    public static void ReArrange(LinkedList<int> list, bool p = true)
     {
-        CheckForSwitch(x, y, ref p);
+        LinkedListNode<int> node = list.First;
+        LinkedListNode<int> nextNode = node.Next;
 
-        int i = p == true ? 1 : -1;
-        return i;
+        LinkedList<int> savedNodes = new LinkedList<int>();
+
+        int i = 1;
+        int steps = 5;
+
+        while (node != null)
+        {
+            CheckForSwitch(i, steps, ref p);
+
+            if (p == false)
+            {
+                LinkedListNode<int> save = node;
+                list.Remove(node);
+                savedNodes.AddLast(save);
+            }
+            if (p == true && i > steps)
+            {
+                // now we want to take the first node from savedNodes and 
+                // add it after the current node
+                // than we want to delete this node from savedNodes, so that we can sample the 
+                // next node in the same way
+                list.AddAfter(node, savedNodes.First);
+                savedNodes.Remove(savedNodes.First);
+            }
+
+            Console.WriteLine($"element{i}: {node}");
+            i++;
+            node = nextNode;
+        }
     }
-    private void CheckForSwitch(int x, int y, ref bool p)
+
+    private static void CheckForSwitch(int x, int y, ref bool p)
     {
         if (x % y == 0)
         {
             p = SwitchBool(p);
         }
     }
-    private bool SwitchBool(bool x)
+    private static bool SwitchBool(bool x)
     {
         return !x;
-    }
-
-    private LinkedList<int> Rearrange(LinkedList<int> list, bool p = true)
-    {
-        LinkedListNode<int> node = list.First;
-        int i = 1;
-
-        while (node != null)
-        {
-            CheckForSwitch(i, 5, ref p);
-            int y = p == true ? 1 : -1;
-
-
-
-            i++;
-            node = node.Next;
-        }
-
-        return list;
     }
 }
