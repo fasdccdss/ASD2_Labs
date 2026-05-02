@@ -29,7 +29,8 @@ public class CollectionChains
         return list;
     }
 
-    public static void Rearrange(LinkedList<int> list, int steps = 5, bool p = true)
+    public static void Rearrange(LinkedList<int> list, int steps = 5, 
+    int previousSteps = 10, bool p = true)
     {
         LinkedListNode<int> node = list.First;
 
@@ -37,32 +38,47 @@ public class CollectionChains
 
         while (node != null)
         {
-            Console.WriteLine($"element {i}: {node.Value}");
             LinkedListNode<int> nextNode = node.Next;
 
-            if (p == false)
+            if (i % (previousSteps * 2) == previousSteps + steps)
             {
+                LinkedListNode<int> save = node;
                 // var nodeValue = node.Value;
-                LinkedListNode<int> s = node;
-
-                for (int x = 0; x < steps; x++)
+                for (int y = 0; y < steps; y++)
                 {
-                    if (s.Next != null)
-                    {
-                        s = s.Next;
-                    }
-                }
+                    LinkedListNode<int> prev = save;
 
-                list.Remove(node);
-                list.AddAfter(s, node.Value);
+                    for (int x = 0; x < previousSteps; x++)
+                    {
+                        if (prev.Previous != null)
+                        {
+                            prev = prev.Previous;
+                        }
+                    }
+
+                    LinkedListNode<int> toMove = save;
+                    save = save.Previous;
+                    list.Remove(toMove);
+                    list.AddAfter(prev, toMove.Value);
+                }
             }
 
-            CheckForSwitch(i, steps, ref p);
             i++;
             node = nextNode;
         }
     }
 
+    public static void PrintList(LinkedList<int> list)
+    {
+        LinkedListNode<int> node = list.First;
+        int i = 1;
+        while (node != null)
+        {
+            Console.WriteLine($"element {i}: {node.Value}");
+            i++;
+            node = node.Next;
+        }
+    }
     private static void CheckForSwitch(int x, int y, ref bool p)
     {
         if (x % y == 0)

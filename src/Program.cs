@@ -17,7 +17,8 @@ class Program
         */
 
         /* LAB 2 */
-        LinkedList<int> list = CollectionChains.BuildList(20);
+        LinkedList<int> list = CollectionChains.BuildList(40);
         CollectionChains.Rearrange(list);
+        CollectionChains.PrintList(list);
     }
 }
