@@ -30,7 +30,7 @@ public class CollectionChains
     }
 
     public static void Rearrange(LinkedList<int> list, int steps = 5, 
-    int previousSteps = 10, bool p = true)
+    int previousSteps = 10)
     {
         LinkedListNode<int> node = list.First;
 
@@ -43,23 +43,21 @@ public class CollectionChains
             if (i % (previousSteps * 2) == previousSteps + steps)
             {
                 LinkedListNode<int> save = node;
-                // var nodeValue = node.Value;
+                LinkedListNode<int> prev = save;
+
+                for (int x = 0; x < previousSteps; x++)
+                {
+                    if (prev.Previous != null)
+                        prev = prev.Previous;
+                }
+
                 for (int y = 0; y < steps; y++)
                 {
-                    LinkedListNode<int> prev = save;
-
-                    for (int x = 0; x < previousSteps; x++)
-                    {
-                        if (prev.Previous != null)
-                        {
-                            prev = prev.Previous;
-                        }
-                    }
-
                     LinkedListNode<int> toMove = save;
                     save = save.Previous;
                     list.Remove(toMove);
-                    list.AddAfter(prev, toMove.Value);
+                    LinkedListNode<int> inserted = list.AddAfter(prev, toMove.Value);
+                    prev = inserted;
                 }
             }
 
@@ -68,8 +66,14 @@ public class CollectionChains
         }
     }
 
-    public static void PrintList(LinkedList<int> list)
+    public static void FreeList(LinkedList<int> list) => list.Clear();
+    public static void PrintList(LinkedList<int> list, int n = 0)
     {
+        if (n > 0)
+        {
+            Console.WriteLine($"n = {n}");
+        }
+
         LinkedListNode<int> node = list.First;
         int i = 1;
         while (node != null)

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 
 class Program
@@ -17,8 +16,27 @@ class Program
         */
 
         /* LAB 2 */
-        LinkedList<int> list = CollectionChains.BuildList(40);
-        CollectionChains.Rearrange(list);
-        CollectionChains.PrintList(list);
+        LinkedList<int> list = null;
+
+        while (list == null)
+        {
+            try
+            {
+                Console.Write("Enter n: ");
+                int n = int.Parse(Console.ReadLine());
+
+                list = CollectionChains.BuildList(n);
+                Console.WriteLine("початкові дані:");
+                CollectionChains.PrintList(list, n);
+
+                CollectionChains.Rearrange(list);
+                Console.WriteLine("одержанi дані:");
+                CollectionChains.PrintList(list, n);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
     }
 }
