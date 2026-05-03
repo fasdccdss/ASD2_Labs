@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 class Program
 {
-    static void Main()
+    
+    static void GABA()
     {
         /* LAB 1 */
         /*
@@ -16,6 +18,7 @@ class Program
         */
 
         /* LAB 2 */
+        /*
         LinkedList<int> list = null;
 
         while (list == null)
@@ -38,5 +41,15 @@ class Program
                 Console.WriteLine(e.Message);
             }
         }
+        */
+
+        /* LAB 3 */
+        
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern int MessageBox(IntPtr hWnd, String text, String caption, uint type);
+
+        MessageBox(IntPtr.Zero, "Привет из WinAPI!", "C# P/Invoke", 0);
+        
     }
+    
 }
