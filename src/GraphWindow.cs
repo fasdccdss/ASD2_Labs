@@ -1,12 +1,11 @@
 using System;
 using System.Drawing;
-using System.Numerics;
 using System.Windows.Forms;
 
 public class GraphWindow : Form
 {
     int seed = 5118;
-
+    int vertexCount = 11;
 
     public GraphWindow()
     {
@@ -41,10 +40,39 @@ public class GraphWindow : Form
     /// 
     /// Graph itself is constructed using a grid that is built after the border, 
     /// each peak is assigned to its respective grid cell
+    /// 
+    /// It is best to draw vertices starting from the middle
     /// </summary>
-    private static void DrawDirectedGraph()
+    private static void DrawDirectedGraph(int seed, int wWidth, int wHeight,
+     int n, int cellSize = 80)
     {
-        
+        PointF[] vertices = new PointF[n];
+
+        int perimeter = n - 1;
+
+        // minimum grid size that can hold all perimeter vertices
+        int perSide = (int)MathF.Ceiling(perimeter / 4f);
+        int columns = perSide;
+        int rows = perSide;
+
+        int requiredWidth = columns * cellSize;
+        int requiredHeight = rows * cellSize;
+
+        int startX = (wWidth - requiredWidth) / 2;
+        int startY = (wHeight - requiredHeight) / 2;
+
+        PointF Cell(int col, int row) => new PointF(
+            startX + col * cellSize,
+            startY + row * cellSize
+        );
+        // placing vertices
+        for (int x = 0; x < rows; x++)
+        {
+            for (int y = 0; y < columns; y++)
+            {
+                
+            }
+        }
     }
     /* UNDIRECTED GRAPH */
     private static void DrawGraph()
@@ -52,6 +80,10 @@ public class GraphWindow : Form
         
     }
     /* DRAWING HELPERS */
+    private static void ConstructEdge()
+    {
+        
+    }
     private static void DrawArrow(Graphics graphics, Pen pen, Point start,
      Point tip, float arrowAngle = 35f)
     {
