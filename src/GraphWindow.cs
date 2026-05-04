@@ -27,16 +27,15 @@ public class GraphWindow : Form
 
     protected override void OnPaint(PaintEventArgs e)
     {
-        Graphics g = e.Graphics;
-
-
+        Graphics graphics = e.Graphics;
+        DrawDirectedGraph(graphics, this.ClientSize, seed, vertexCount);
     }
     /* DIRECTED GRAPH */
     /// <summary>
     /// 
     /// </summary>
-    private static void DrawDirectedGraph(int seed,
-     int n, int minSpace = 30, int vertRadius = 5)
+    private static void DrawDirectedGraph(Graphics graphics, Size clientSize,
+        int seed, int n, int minSpace = 100, int vertRadius = 30)
     {
         int minRows = 3;
         int minColumns = 3;
@@ -51,7 +50,7 @@ public class GraphWindow : Form
         int maxColumns = minColumns;
         int uColumns = minColumns;
         int dColumns = minColumns;
-
+        // vertices calculations
         if (vertices > minEdges)
         {
             bool increaseRows = false;
@@ -96,9 +95,45 @@ public class GraphWindow : Form
                 }
             }
         }
-
+        // rect calculations
         int rectWidth = maxColumns * minSpace;
         int rectHeight = maxRows * minSpace;
+
+        int centerX = clientSize.Width / 2;
+        int centerY = clientSize.Height / 2;
+
+        int left = centerX - rectWidth / 2;
+        int top = centerY - rectHeight / 2;
+
+        int right = left + rectWidth;
+        int bottom = top + rectHeight;
+        //
+        Point[] pos = new Point[vertices];
+        int idx = 0;
+        // placing vertices
+        // top edge
+        for (int x = 0; x < uColumns; x++) // here x is 0 because we need to place the first corner
+            pos[idx++] = new Point(left + x * rectWidth / (uColumns - 1), top);
+        // right edge
+        for (int x = 1; x < rRows; x++) 
+            pos[idx++] = new Point(right, top + x * rectHeight / (rRows - 1));
+        // bottom edge
+        for (int x = 1; x < dColumns; x++)
+            pos[idx++] = new Point(right - x * rectWidth / (dColumns - 1), bottom);
+        // left edge
+        for (int x = 1; x < lRows - 1; x++) // deduct 1(last edge) to prevent array overpopulation
+            pos[idx++] = new Point(left, bottom - x * rectHeight / (lRows - 1));
+
+        using Pen pen = new Pen(Color.Black, 2);
+        using Font font = new Font("Arial", 10);
+        using SolidBrush brush = new SolidBrush(Color.Black);
+        for (int x = 0; x < vertices; x++)
+        {
+            graphics.DrawEllipse(pen, pos[x].X - vertRadius, pos[x].Y - vertRadius,
+                          2 * vertRadius, 2 * vertRadius);
+            graphics.DrawString((x + 1).ToString(), font, brush,
+                         pos[x].X - vertRadius / 2, pos[x].Y - vertRadius / 2);
+        }
     }
     /* UNDIRECTED GRAPH */
     private static void DrawGraph()
@@ -106,7 +141,7 @@ public class GraphWindow : Form
         
     }
     /* DRAWING HELPERS */
-    private static void ConstructEdge()
+    private static void DrawVertices()
     {
         
     }
