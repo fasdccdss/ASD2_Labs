@@ -33,37 +33,43 @@ public class GraphWindow : Form
 
     }
     /* DIRECTED GRAPH */
-
-    /* UNDIRECTED GRAPH */
-
-    /* DRAWING HELPERS */
-    private static void DrawArrowLine(Graphics graphics, Pen pen, Vector2 start,
-     Vector2 tip, float arrowAngle = 35f)
+    /// <summary>
+    /// to implement this we can take the N amount of "Peaks", 
+    /// allocate a square of size X for each peak,
+    /// than using this allocated space space, 
+    /// calculate the overall size of the border the graph would be constructed inside
+    /// 
+    /// Graph itself is constructed using a grid that is built after the border, 
+    /// each peak is assigned to its respective grid cell
+    /// </summary>
+    private static void DrawDirectedGraph()
     {
-
-
-        Arrow(graphics, pen, arrowAngle, tip);
+        
     }
-    private static void Arrow(Graphics graphics, Pen pen, float angle,
-     Vector2 tip)
+    /* UNDIRECTED GRAPH */
+    private static void DrawGraph()
+    {
+        
+    }
+    /* DRAWING HELPERS */
+    private static void DrawArrow(Graphics graphics, Pen pen, Point start,
+     Point tip, float arrowAngle = 35f)
+    {
+        graphics.DrawLine(pen, start, tip);
+        ArrowHead(graphics, pen, arrowAngle, tip);
+    }
+    private static void ArrowHead(Graphics graphics, Pen pen, float angle,
+     Point tip)
     {
         angle = 3.1416f * (180f - angle) / 180f;
 
-        int tipX = (int)(tip.X);
-        int tipY = (int)(tip.Y);
+        int lx = tip.X + (int)(15 * MathF.Cos(angle + 0.3f));
+        int rx = tip.X + (int)(15 * MathF.Cos(angle - 0.3f));
+        int ly = tip.Y + (int)(15 * MathF.Sin(angle + 0.3f));
+        int ry = tip.Y + (int)(15 * MathF.Sin(angle - 0.3f));
 
-        int lx = tipX + (int)(15 * MathF.Cos(angle + 0.3f));
-        int rx = tipX + (int)(15 * MathF.Cos(angle - 0.3f));
-        int ly = tipY + (int)(15 * MathF.Sin(angle + 0.3f));
-        int ry = tipY + (int)(15 * MathF.Sin(angle - 0.3f));
-
-        graphics.DrawLine(pen, lx, ly, tipX, tipY);
-        graphics.DrawLine(pen, tipX, tipY, rx, ry);
-    }
-    private static void DrawLine(Graphics graphics, Pen pen, Vector2 start,
-    Vector2 tip)
-    {
-        
+        graphics.DrawLine(pen, lx, ly, tip.X, tip.Y);
+        graphics.DrawLine(pen, tip.X, tip.Y, rx, ry);
     }
     /* BUTTONS */
     private Button BuildSwichBtn()
@@ -78,7 +84,7 @@ public class GraphWindow : Form
         {
             showDirected = !showDirected;
             switchBtn.Text = showDirected ? "Directed graph" : "Undirected graph";
-            this.Invalidate(); // аналог InvalidateRect — перемальовує вікно
+            this.Invalidate(); // Re-draws
         };
 
         return switchBtn;
