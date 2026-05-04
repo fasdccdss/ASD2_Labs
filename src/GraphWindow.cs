@@ -108,7 +108,7 @@ public class GraphWindow : Form
         int right = left + rectWidth;
         int bottom = top + rectHeight;
         //
-        Point[] pos = new Point[vertices];
+        Point[] pos = new Point[n];
         int idx = 0;
         // placing vertices
         // top edge
@@ -123,16 +123,20 @@ public class GraphWindow : Form
         // left edge
         for (int x = 1; x < lRows - 1; x++) // deduct 1(last edge) to prevent array overpopulation
             pos[idx++] = new Point(left, bottom - x * rectHeight / (lRows - 1));
-
+        // center verticy
+        pos[idx++] = new Point(centerX, centerY);
+        // drawing
         using Pen pen = new Pen(Color.Black, 2);
-        using Font font = new Font("Arial", 10);
+        using Font font = new Font("Arial", vertRadius / 2);
         using SolidBrush brush = new SolidBrush(Color.Black);
-        for (int x = 0; x < vertices; x++)
+        for (int x = 0; x < pos.Length; x++)
         {
             graphics.DrawEllipse(pen, pos[x].X - vertRadius, pos[x].Y - vertRadius,
                           2 * vertRadius, 2 * vertRadius);
+            SizeF textSize = graphics.MeasureString((x + 1).ToString(), font);
             graphics.DrawString((x + 1).ToString(), font, brush,
-                         pos[x].X - vertRadius / 2, pos[x].Y - vertRadius / 2);
+                pos[x].X - textSize.Width / 2,
+                pos[x].Y - textSize.Height / 2);
         }
     }
     /* UNDIRECTED GRAPH */
