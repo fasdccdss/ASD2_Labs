@@ -42,14 +42,6 @@ class Program
             }
         }
         */
-
-        /* LAB 3 */
-        
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        static extern int MessageBox(IntPtr hWnd, String text, String caption, uint type);
-
-        MessageBox(IntPtr.Zero, "Привет из WinAPI!", "C# P/Invoke", 0);
-        
     }
     
 }
