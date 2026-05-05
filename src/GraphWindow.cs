@@ -11,6 +11,7 @@ struct Vertex
     public Point center;
     public int radius;
 
+
     public Vertex(int centerX, int centerY, int radius)
     {
         center.X = centerX;
@@ -27,6 +28,8 @@ struct Vertex
 
 public class GraphWindow : Form
 {
+    static bool showDirected = true;
+
     int seed = 5118;
     int vertexCount = 11;
 
@@ -52,11 +55,11 @@ public class GraphWindow : Form
     {
         Graphics graphics = e.Graphics;
         Pen pen = new Pen(Color.Black, 2.0f);
-        DrawDirectedGraph(graphics, this.ClientSize, pen, seed, vertexCount);
+        DrawGraph(graphics, this.ClientSize, pen, seed, vertexCount, showDirected);
     }
     /* DIRECTED GRAPH */
-    private static void DrawDirectedGraph(Graphics graphics, Size clientSize, Pen pen,
-        int seed, int n, int minSpace = 100, int vertRadius = 30)
+    private static void DrawGraph(Graphics graphics, Size clientSize, Pen pen,
+        int seed, int n, bool directed, int minSpace = 100, int vertRadius = 30)
     {
         double[,] matrix = BuildMatrix(seed, n);
         Vertex[] verts = DrawVertices(graphics, clientSize, pen, n, minSpace, vertRadius);
@@ -68,6 +71,15 @@ public class GraphWindow : Form
             {
                 if (matrix[x, y] == 1)
                 {
+                    if (x == y)
+                    {
+                        graphics.DrawEllipse(pen,
+                            verts[x].center.X,
+                            verts[x].center.Y - vertRadius * 2,
+                            vertRadius, vertRadius);
+                        continue;
+                    }
+
                     float angle = MathF.Atan2(
                         verts[y].center.Y - verts[x].center.Y,
                         verts[y].center.X - verts[x].center.X
@@ -92,7 +104,6 @@ public class GraphWindow : Form
                         Point? intersection = LineIntersectsCircle(start, end, verts[z]);
                         if (intersection.HasValue)
                         {
-                            // which side of A→B is the blocker center on?
                             float ldx = end.X - start.X, ldy = end.Y - start.Y;
                             float crossZ = ldx * (verts[z].center.Y - start.Y)
                                          - ldy * (verts[z].center.X - start.X);
@@ -120,7 +131,10 @@ public class GraphWindow : Form
                         }
                     }
 
-                    DrawBrokenLine(graphics, pen, start, breaks, end);
+                    if (directed)
+                        DrawBrokenArrow(graphics, pen, start, breaks, end);
+                    else
+                        DrawBrokenLine(graphics, pen, start, breaks, end);
                 }
             }
         }
@@ -131,9 +145,6 @@ public class GraphWindow : Form
         
     }
     /* ADJACENCY MATRIX */
-    // here i should actually have this method return a type "Matrix" that
-    // would hold all information about the matrix, so that
-    // we can reference it for building arrows and shit
     private static double[,] BuildMatrix(int seed, int n)
     {
         double[,] matrix = new double[n, n];
@@ -290,6 +301,23 @@ public class GraphWindow : Form
         );
     }
 
+    private static void DrawBrokenArrow(Graphics graphics, Pen pen,
+        Point start, Point?[] breaks, Point end)
+    {
+        Point lastPoint = start;
+        for (int x = 0; x < breaks.Length; x++)
+        {
+            if (breaks[x] != null)
+            {
+                graphics.DrawLine(pen, lastPoint, breaks[x].Value);
+                lastPoint = breaks[x].Value;
+            }
+        }
+        float arrowAngle = MathF.Atan2(end.Y - lastPoint.Y, end.X - lastPoint.X) * 180f / MathF.PI;
+
+        graphics.DrawLine(pen, lastPoint, end);
+        ArrowHead(graphics, pen, arrowAngle, end);
+    }
     private static void DrawBrokenLine(Graphics graphics, Pen pen,
     Point start, Point?[] breaks, Point end)
     {
@@ -306,7 +334,7 @@ public class GraphWindow : Form
         graphics.DrawLine(pen, lastPoint, end);
     }
     private static void DrawArrow(Graphics graphics, Pen pen, Point start,
-     Point tip, float arrowAngle = 35f)
+     Point tip, float arrowAngle)
     {
         graphics.DrawLine(pen, start, tip);
         ArrowHead(graphics, pen, arrowAngle, tip);
@@ -315,7 +343,7 @@ public class GraphWindow : Form
     private static void ArrowHead(Graphics graphics, Pen pen, float angle,
      Point tip)
     {
-        angle = 3.1416f * (180f - angle) / 180f;
+        angle = 3.1416f * (180f + angle) / 180f;
 
         int lx = tip.X + (int)(15 * MathF.Cos(angle + 0.3f));
         int rx = tip.X + (int)(15 * MathF.Cos(angle - 0.3f));
@@ -329,8 +357,6 @@ public class GraphWindow : Form
     /* BUTTONS */
     private Button BuildSwichBtn()
     {
-        bool showDirected = true;
-
         Button switchBtn = new Button();
         switchBtn.Text = "Directed graph";
         switchBtn.Location = new Point(10, 10);
