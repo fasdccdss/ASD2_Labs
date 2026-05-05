@@ -1,6 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+
+
+struct Vertex
+{
+    public Point center;
+    public int radius;
+
+    public Vertex(int centerX, int centerY, int radius)
+    {
+        center.X = centerX;
+        center.Y = centerY;
+        this.radius = radius;
+    }
+
+    public bool Intersects(Point p)
+    {
+        int dx = p.X - center.X, dy = p.Y - center.Y;
+        return dx * dx + dy * dy <= radius * radius;
+    }
+}
 
 public class GraphWindow : Form
 {
@@ -31,11 +52,52 @@ public class GraphWindow : Form
         DrawDirectedGraph(graphics, this.ClientSize, seed, vertexCount);
     }
     /* DIRECTED GRAPH */
-    /// <summary>
-    /// 
-    /// </summary>
     private static void DrawDirectedGraph(Graphics graphics, Size clientSize,
         int seed, int n, int minSpace = 100, int vertRadius = 30)
+    {
+        DrawVertices(graphics, clientSize, n, minSpace, vertRadius);
+    }
+    /* UNDIRECTED GRAPH */
+    private static void DrawGraph()
+    {
+        
+    }
+    /* ADJACENCY MATRIX */
+    // here i should actually have this method return a type "Matrix" that
+    // would hold all information about the matrix, so that
+    // we can reference it for building arrows and shit
+    private static double[,] BuildMatrix(int seed, int n)
+    {
+        double[,] matrix = new double[n, n];
+        Random rng = new Random(seed);
+
+        double k = 1f - 1 * 0.02f - 8 * 0.005f - 0.25f;
+
+        for (int x = 0; x < n; x++)
+        {
+            for (int y = 0; y < n; y++)
+            {
+                double element = (rng.NextDouble() * 2.0f) * k;
+                
+                if (element < 1)
+                    element = 0;
+                else
+                    element = 1;
+
+                matrix[x, y] = element;
+            }
+        }
+
+        return matrix;
+    }
+    /* DRAWING HELPERS */
+    private static void DrawMatrix()
+    {
+        
+    }
+
+    private static void DrawVertices(Graphics graphics, Size clientSize, 
+        int n, int minSpace = 100, int vertRadius = 30)
     {
         int minRows = 3;
         int minColumns = 3;
@@ -108,53 +170,45 @@ public class GraphWindow : Form
         int right = left + rectWidth;
         int bottom = top + rectHeight;
         //
-        Point[] pos = new Point[n];
+        Vertex[] verts = new Vertex[n];
         int idx = 0;
         // placing vertices
         // top edge
         for (int x = 0; x < uColumns; x++) // here x is 0 because we need to place the first corner
-            pos[idx++] = new Point(left + x * rectWidth / (uColumns - 1), top);
+            verts[idx++] = new Vertex(left + x * rectWidth / (uColumns - 1), top, vertRadius);
         // right edge
-        for (int x = 1; x < rRows; x++) 
-            pos[idx++] = new Point(right, top + x * rectHeight / (rRows - 1));
+        for (int x = 1; x < rRows; x++)
+            verts[idx++] = new Vertex(right, top + x * rectHeight / (rRows - 1), vertRadius);
         // bottom edge
         for (int x = 1; x < dColumns; x++)
-            pos[idx++] = new Point(right - x * rectWidth / (dColumns - 1), bottom);
+            verts[idx++] = new Vertex(right - x * rectWidth / (dColumns - 1), bottom, vertRadius);
         // left edge
         for (int x = 1; x < lRows - 1; x++) // deduct 1(last edge) to prevent array overpopulation
-            pos[idx++] = new Point(left, bottom - x * rectHeight / (lRows - 1));
+            verts[idx++] = new Vertex(left, bottom - x * rectHeight / (lRows - 1), vertRadius);
         // center verticy
-        pos[idx++] = new Point(centerX, centerY);
+        verts[idx++] = new Vertex(centerX, centerY, vertRadius);
         // drawing
         using Pen pen = new Pen(Color.Black, 2);
         using Font font = new Font("Arial", vertRadius / 2);
         using SolidBrush brush = new SolidBrush(Color.Black);
-        for (int x = 0; x < pos.Length; x++)
+        for (int x = 0; x < verts.Length; x++)
         {
-            graphics.DrawEllipse(pen, pos[x].X - vertRadius, pos[x].Y - vertRadius,
+            graphics.DrawEllipse(pen, verts[x].center.X - vertRadius, verts[x].center.Y - vertRadius,
                           2 * vertRadius, 2 * vertRadius);
             SizeF textSize = graphics.MeasureString((x + 1).ToString(), font);
             graphics.DrawString((x + 1).ToString(), font, brush,
-                pos[x].X - textSize.Width / 2,
-                pos[x].Y - textSize.Height / 2);
+                verts[x].center.X - textSize.Width / 2,
+                verts[x].center.Y - textSize.Height / 2);
         }
     }
-    /* UNDIRECTED GRAPH */
-    private static void DrawGraph()
-    {
-        
-    }
-    /* DRAWING HELPERS */
-    private static void DrawVertices()
-    {
-        
-    }
+
     private static void DrawArrow(Graphics graphics, Pen pen, Point start,
      Point tip, float arrowAngle = 35f)
     {
         graphics.DrawLine(pen, start, tip);
         ArrowHead(graphics, pen, arrowAngle, tip);
     }
+
     private static void ArrowHead(Graphics graphics, Pen pen, float angle,
      Point tip)
     {
@@ -168,6 +222,7 @@ public class GraphWindow : Form
         graphics.DrawLine(pen, lx, ly, tip.X, tip.Y);
         graphics.DrawLine(pen, tip.X, tip.Y, rx, ry);
     }
+
     /* BUTTONS */
     private Button BuildSwichBtn()
     {
