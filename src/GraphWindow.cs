@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Numerics;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 
@@ -49,13 +51,79 @@ public class GraphWindow : Form
     protected override void OnPaint(PaintEventArgs e)
     {
         Graphics graphics = e.Graphics;
-        DrawDirectedGraph(graphics, this.ClientSize, seed, vertexCount);
+        Pen pen = new Pen(Color.Black, 2.0f);
+        DrawDirectedGraph(graphics, this.ClientSize, pen, seed, vertexCount);
     }
     /* DIRECTED GRAPH */
-    private static void DrawDirectedGraph(Graphics graphics, Size clientSize,
+    private static void DrawDirectedGraph(Graphics graphics, Size clientSize, Pen pen,
         int seed, int n, int minSpace = 100, int vertRadius = 30)
     {
-        DrawVertices(graphics, clientSize, n, minSpace, vertRadius);
+        double[,] matrix = BuildMatrix(seed, n);
+        Vertex[] verts = DrawVertices(graphics, clientSize, pen, n, minSpace, vertRadius);
+
+        // loopin n shi
+        for (int x = 0; x < n; x++)
+        {
+            for (int y = 0; y < n; y++)
+            {
+                if (matrix[x, y] == 1)
+                {
+                    float angle = MathF.Atan2(
+                        verts[y].center.Y - verts[x].center.Y,
+                        verts[y].center.X - verts[x].center.X
+                    );
+
+                    Point start = new Point(
+                        verts[x].center.X + (int)(vertRadius * MathF.Cos(angle)),
+                        verts[x].center.Y + (int)(vertRadius * MathF.Sin(angle))
+                    );
+                    Point end = new Point(
+                        verts[y].center.X - (int)(vertRadius * MathF.Cos(angle)),
+                        verts[y].center.Y - (int)(vertRadius * MathF.Sin(angle))
+                    );
+                    Point?[] breaks = new Point?[n];
+
+                    // find any possible intersection points and offset them
+                    // to store as a break
+                    for (int z = 0; z < n; z++)
+                    {
+                        if (z == x || z == y) continue;
+
+                        Point? intersection = LineIntersectsCircle(start, end, verts[z]);
+                        if (intersection.HasValue)
+                        {
+                            // which side of A→B is the blocker center on?
+                            float ldx = end.X - start.X, ldy = end.Y - start.Y;
+                            float crossZ = ldx * (verts[z].center.Y - start.Y)
+                                         - ldy * (verts[z].center.X - start.X);
+                            int side = crossZ > 0 ? 1 : -1;
+
+                            // tangent point from start to the blocker circle
+                            float cdx = verts[z].center.X - start.X, cdy = verts[z].center.Y - start.Y;
+                            float D2 = cdx * cdx + cdy * cdy;
+                            float D = MathF.Sqrt(D2);
+                            float L2 = D2 - verts[z].radius * verts[z].radius;
+                            float d = L2 / D;
+                            float h = MathF.Sqrt(L2 - d * d);
+
+                            float tx = start.X + (cdx * d + side * (-cdy) * h) / D;
+                            float ty = start.Y + (cdy * d + side * cdx * h) / D;
+
+                            // small clearance margin
+                            float nx = (tx - verts[z].center.X) / verts[z].radius;
+                            float ny = (ty - verts[z].center.Y) / verts[z].radius;
+                            breaks[z] = new Point(
+                                (int)(tx + nx * 5),
+                                (int)(ty + ny * 5)
+                            );
+                            break;
+                        }
+                    }
+
+                    DrawBrokenLine(graphics, pen, start, breaks, end);
+                }
+            }
+        }
     }
     /* UNDIRECTED GRAPH */
     private static void DrawGraph()
@@ -91,12 +159,7 @@ public class GraphWindow : Form
         return matrix;
     }
     /* DRAWING HELPERS */
-    private static void DrawMatrix()
-    {
-        
-    }
-
-    private static void DrawVertices(Graphics graphics, Size clientSize, 
+    private static Vertex[] DrawVertices(Graphics graphics, Size clientSize, Pen pen,
         int n, int minSpace = 100, int vertRadius = 30)
     {
         int minRows = 3;
@@ -188,7 +251,6 @@ public class GraphWindow : Form
         // center verticy
         verts[idx++] = new Vertex(centerX, centerY, vertRadius);
         // drawing
-        using Pen pen = new Pen(Color.Black, 2);
         using Font font = new Font("Arial", vertRadius / 2);
         using SolidBrush brush = new SolidBrush(Color.Black);
         for (int x = 0; x < verts.Length; x++)
@@ -200,8 +262,49 @@ public class GraphWindow : Form
                 verts[x].center.X - textSize.Width / 2,
                 verts[x].center.Y - textSize.Height / 2);
         }
+
+        return verts;
     }
 
+    private static Point? LineIntersectsCircle(Point a, Point b, Vertex v)
+    {
+        float dx = b.X - a.X;
+        float dy = b.Y - a.Y;
+
+        float fx = a.X - v.center.X;
+        float fy = a.Y - v.center.Y;
+
+        float aVal = dx * dx + dy * dy;
+        float bVal = 2 * (fx * dx + fy * dy);
+        float c = fx * fx + fy * fy - v.radius * v.radius;
+
+        float discriminant = bVal * bVal - 4 * aVal * c;
+        if (discriminant < 0) return null;
+
+        float t = (-bVal - MathF.Sqrt(discriminant)) / (2 * aVal);
+        if (t < 0 || t > 1) return null; // intersection outside the segment
+
+        return new Point(
+            (int)(a.X + t * dx),
+            (int)(a.Y + t * dy)
+        );
+    }
+
+    private static void DrawBrokenLine(Graphics graphics, Pen pen,
+    Point start, Point?[] breaks, Point end)
+    {
+        Point lastPoint = start;
+        for (int x = 0; x < breaks.Length; x++)
+        {
+            if (breaks[x] != null)
+            {
+                graphics.DrawLine(pen, lastPoint, breaks[x].Value);
+                lastPoint = breaks[x].Value;
+            }
+        }
+
+        graphics.DrawLine(pen, lastPoint, end);
+    }
     private static void DrawArrow(Graphics graphics, Pen pen, Point start,
      Point tip, float arrowAngle = 35f)
     {
