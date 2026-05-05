@@ -30,8 +30,11 @@ public class GraphWindow : Form
 {
     static bool showDirected = true;
 
-    int seed = 5118;
-    int vertexCount = 11;
+    static int seed = 5118;
+    static int vertexCount = 11;
+
+    static double[,] adirMatrix = BuildAdirMatrix(seed, vertexCount);
+    static double[,] aundirMatrix = BuildAundirMatrix(seed, vertexCount);
 
     public GraphWindow()
     {
@@ -43,28 +46,36 @@ public class GraphWindow : Form
         this.BackColor = Color.White;
 
         this.Controls.Add(BuildSwichBtn());
+        this.Controls.Add(BuildMatrixButton());
     }
     static void Main()
     {
         Application.Run(new GraphWindow());
-
-        
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
         Graphics graphics = e.Graphics;
         Pen pen = new Pen(Color.Black, 2.0f);
-        DrawGraph(graphics, this.ClientSize, pen, seed, vertexCount, showDirected);
-    }
-    /* DIRECTED GRAPH */
-    private static void DrawGraph(Graphics graphics, Size clientSize, Pen pen,
-        int seed, int n, bool directed, int minSpace = 100, int vertRadius = 30)
-    {
-        double[,] matrix = BuildMatrix(seed, n);
-        Vertex[] verts = DrawVertices(graphics, clientSize, pen, n, minSpace, vertRadius);
 
-        // loopin n shi
+        double[,] currentMatrix = showDirected == true ? adirMatrix : aundirMatrix;
+
+        DrawGraph(graphics, this.ClientSize, pen, vertexCount, showDirected);
+    }
+    /* GRAPH */
+    private static void DrawGraph(Graphics graphics, Size clientSize, Pen pen,
+        int n, bool directed, int minSpace = 100, int vertRadius = 30)
+    {
+        Vertex[] verts = DrawVertices(graphics, clientSize, pen, n, minSpace, vertRadius);
+        if (directed)
+            DrawEdges(graphics, pen, verts, n, adirMatrix, vertRadius, directed);
+        else
+            DrawEdges(graphics, pen, verts, n, aundirMatrix, vertRadius, directed);
+    }
+
+    private static void DrawEdges(Graphics graphics, Pen pen, Vertex[] verts,
+        int n, double[,] matrix, int vertRadius, bool directed)
+    {
         for (int x = 0; x < n; x++)
         {
             for (int y = 0; y < n; y++)
@@ -139,13 +150,72 @@ public class GraphWindow : Form
             }
         }
     }
-    /* UNDIRECTED GRAPH */
-    private static void DrawGraph()
-    {
-        
-    }
     /* ADJACENCY MATRIX */
-    private static double[,] BuildMatrix(int seed, int n)
+    private Button BuildMatrixButton()
+    {
+        {
+            Form matrixForm = null;
+
+            Button btn = new Button();
+            btn.Text = "Show Matrix";
+            btn.Location = new Point(170, 10);
+            btn.Size = new Size(150, 30);
+            btn.Click += (s, e) =>
+            {
+                if (matrixForm == null || matrixForm.IsDisposed)
+                {
+                    matrixForm = new Form();
+                    matrixForm.Text = "Adjacency Matrix";
+                    matrixForm.Size = new Size(600, 300);
+                    matrixForm.BackColor = Color.White;
+                    matrixForm.Paint += (s2, e2) => 
+                        DrawMatrix(e2.Graphics, adirMatrix, vertexCount, new Point(10, 10));
+                    matrixForm.Paint += (s2, e2) =>
+                        DrawMatrix(e2.Graphics, aundirMatrix, vertexCount, new Point(310, 10));
+                    matrixForm.Show();
+                    btn.Text = "Hide Matrix";
+                    matrixForm.FormClosed += (s2, e2) => btn.Text = "Show Matrix";
+                }
+                else
+                {
+                    matrixForm.Close();
+                    btn.Text = "Show Matrix";
+                }
+            };
+
+            return btn;
+        }
+    }
+    private void ShowMatrixWindow(double[,] matrix, int n)
+    {
+        Form matrixForm = new Form();
+        matrixForm.Text = "Adjacency Matrix";
+        matrixForm.Size = new Size(300, 300);
+        matrixForm.BackColor = Color.White;
+
+        matrixForm.Paint += (s, e) =>
+        {
+            DrawMatrix(e.Graphics, matrix, n, new Point(10, 10));
+        };
+
+        matrixForm.Show();
+    }
+    private static void DrawMatrix(Graphics graphics, double[,] matrix, int n, Point origin)
+    {
+        using Font font = new Font("Comic Sans MS", 10); // :)
+        using SolidBrush brush = new SolidBrush(Color.Black);
+        int cellSize = 20;
+
+        for (int x = 0; x < n; x++)
+            for (int y = 0; y < n; y++)
+            {
+                string val = matrix[x, y] == 1 ? "1" : "0";
+                graphics.DrawString(val, font, brush,
+                    origin.X + y * cellSize,
+                    origin.Y + x * cellSize);
+            }
+    }
+    private static double[,] BuildAdirMatrix(int seed, int n)
     {
         double[,] matrix = new double[n, n];
         Random rng = new Random(seed);
@@ -164,6 +234,31 @@ public class GraphWindow : Form
                     element = 1;
 
                 matrix[x, y] = element;
+            }
+        }
+
+        return matrix;
+    }
+    private static double[,] BuildAundirMatrix(int seed, int n)
+    {
+        double[,] matrix = new double[n, n];
+        Random rng = new Random(seed);
+
+        double k = 1f - 1 * 0.02f - 8 * 0.005f - 0.25f;
+
+        for (int x = 0; x < n; x++)
+        {
+            for (int y = 0; y < n; y++)
+            {
+                double element = (rng.NextDouble() * 2.0f) * k;
+
+                if (element < 1)
+                    element = 0;
+                else
+                    element = 1;
+
+                matrix[x, y] = element;
+                matrix[y, x] = element;
             }
         }
 
