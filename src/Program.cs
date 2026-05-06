@@ -44,7 +44,10 @@ class Program
         }
         */
         /* LAB 3 */
-        Application.Run(new GraphWindow());
+        // Application.Run(new GraphWindow());
+
+        /* LAB 4 */
+        Application.Run(new GraphCharacteristics());
     }
     
 }

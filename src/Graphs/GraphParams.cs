@@ -1,6 +1,7 @@
 using System.Diagnostics.Contracts;
+using System.Windows.Forms;
 
-public class GraphParams
+public class GraphParams : Form
 {
     public static int n3 = 1;
     public static int n4 = 8;

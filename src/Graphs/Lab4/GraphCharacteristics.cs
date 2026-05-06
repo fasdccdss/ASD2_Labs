@@ -1,9 +1,10 @@
-
-
 using System.CodeDom;
+using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
-public class GraphCharacteristics
+public class GraphCharacteristics : Form
 {
     static int n3 = GraphParams.n3;
     static int n4 = GraphParams.n4;
@@ -12,14 +13,62 @@ public class GraphCharacteristics
 
     static int seed = GraphParams.seed;
 
-    static double k = 1.0 - n3 * 0.01 - n4 * 0.01 - 0.03;
+    static double k1 = 1.0 - n3 * 0.01 - n4 * 0.01 - 0.03;
+    static double k2 = 1.0 - n3 * 0.005 - n4 * 0.005 - 0.27;
 
-    static double[,] adirMatrix = GraphWindow.BuildAdirMatrix(seed, vertexCount, k);
-    static double[,] aundirMatrix = GraphWindow.BuildAundirMatrix(seed, vertexCount, k);
+    static System.Action<Graphics> currentDraw;
+
+
+    public GraphCharacteristics()
+    {
+        this.Text = "Lab 4";
+
+        this.Location = new Point(100, 100);
+        this.Size = new Size(840, 640);
+
+        this.BackColor = Color.GhostWhite;
+        Construct();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        currentDraw?.Invoke(e.Graphics);
+    }
+
+    public void Construct()
+    {
+        double[,] adirMatrix1 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k1);
+        double[,] aundirMatrix1 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k1);
+        MatrixData matrixData1 = new MatrixData(adirMatrix1, aundirMatrix1, true, vertexCount);
+
+        Button matrixToggle1 = null;
+        matrixToggle1  = UIConstructor.BuildButton("GRAPH 1", new Point(10, 10), new Size(150, 30), 
+        () => 
+        {
+            UIConstructor.GraphToggle(ref currentDraw, this, new Pen(Color.Black, 2), matrixData1);
+            matrixToggle1.Text = matrixData1.directed ? "GRAPH 1 | Directed" : "GRAPH 1 | Undirected";
+            this.Invalidate();
+        });
+        this.Controls.Add(matrixToggle1);
+
+        double[,] adirMatrix2 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k2);
+        double[,] aundirMatrix2 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k2);
+        MatrixData matrixData2 = new MatrixData(adirMatrix2, aundirMatrix2, true, vertexCount);
+
+        Button matrixToggle2 = null;
+        matrixToggle2 = UIConstructor.BuildButton("GRAPH 2", new Point(170, 10), new Size(150, 30),
+        () => 
+        {
+            UIConstructor.GraphToggle(ref currentDraw, this, new Pen(Color.Black, 2), matrixData2);
+            matrixToggle2.Text = matrixData2.directed ? "GRAPH 2 | Directed" : "GRAPH 2 | Undirected";
+            this.Invalidate();
+        });
+        this.Controls.Add(matrixToggle2);
+    }
 
     /* VERTEX DEGREES */
     // full degrees
-    public static int[] VertexDegreeArray(int[,] matrix)
+    public static int[] VertexDegreeArray(double[,] matrix)
     {
         int n = matrix.GetLength(0);
 
@@ -32,12 +81,12 @@ public class GraphCharacteristics
 
         return vertexDegrees;
     }
-    public static int GetVertexDegree(int vertexIndex, int[,] matrix)
+    public static int GetVertexDegree(int vertexIndex, double[,] matrix)
     {
         return GetVertexInDegree(vertexIndex, matrix) + GetVertexOutDegree(vertexIndex, matrix);
     }
     // out-degree
-    public static int GetVertexInDegree(int vertexIndex, int[,] matrix)
+    public static int GetVertexInDegree(int vertexIndex, double[,] matrix)
     {
         int outDegree = 0;
 
@@ -52,7 +101,7 @@ public class GraphCharacteristics
         return outDegree;
     }
     // in-degree
-    public static int GetVertexOutDegree(int vertexIndex, int[,] matrix)
+    public static int GetVertexOutDegree(int vertexIndex, double[,] matrix)
     {
         int inDegree = 0;
 
@@ -67,7 +116,7 @@ public class GraphCharacteristics
         return inDegree;
     }
     /* GRAPH REGULARNESS CHECK */
-    public static bool isRegular(int[,] matrix, out int? degree)
+    public static bool isRegular(double[,] matrix, out int? degree)
     {
         int n = matrix.GetLength(0);
 
@@ -85,6 +134,12 @@ public class GraphCharacteristics
 
         degree = firstOut;
         return true;
+    }
+
+    /* HANGING/ISOLATED VERTECISE */
+    public static int IsolatedVerts(double[,] matrix)
+    {
+        
     }
 
     /* MATRIX TRANSFORMATIONS */
