@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 class Program
 {
     
-    static void GABA()
+    static void Main()
     {
         /* LAB 1 */
         /*
@@ -42,6 +43,8 @@ class Program
             }
         }
         */
+        /* LAB 3 */
+        Application.Run(new GraphWindow());
     }
     
 }

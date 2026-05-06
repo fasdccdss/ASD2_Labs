@@ -1,5 +1,7 @@
 using System;
+using System.CodeDom;
 using System.Drawing;
+using System.Reflection.Metadata;
 using System.Windows.Forms;
 
 struct Vertex
@@ -26,11 +28,12 @@ public class GraphWindow : Form
 {
     static bool showDirected = true;
 
-    static int seed = 5118;
+    static int seed = GraphParams.seed;
     static int vertexCount = 11;
+    static double k = 1f - 1 * 0.02f - 8 * 0.005f - 0.25f;
 
-    static double[,] adirMatrix = BuildAdirMatrix(seed, vertexCount);
-    static double[,] aundirMatrix = BuildAundirMatrix(seed, vertexCount);
+    static double[,] adirMatrix = BuildAdirMatrix(seed, vertexCount, k);
+    static double[,] aundirMatrix = BuildAundirMatrix(seed, vertexCount, k);
 
     public GraphWindow()
     {
@@ -44,11 +47,12 @@ public class GraphWindow : Form
         this.Controls.Add(BuildSwichBtn());
         this.Controls.Add(BuildMatrixButton());
     }
-    static void Main()
+    /*
+    private static void Main()
     {
         Application.Run(new GraphWindow());
     }
-
+    */
     protected override void OnPaint(PaintEventArgs e)
     {
         Graphics graphics = e.Graphics;
@@ -56,10 +60,10 @@ public class GraphWindow : Form
 
         double[,] currentMatrix = showDirected == true ? adirMatrix : aundirMatrix;
 
-        DrawGraph(graphics, this.ClientSize, pen, vertexCount, showDirected);
+        DrawChosenGraph(graphics, this.ClientSize, pen, vertexCount, showDirected);
     }
     /* GRAPH */
-    private static void DrawGraph(Graphics graphics, Size clientSize, Pen pen,
+    private static void DrawChosenGraph(Graphics graphics, Size clientSize, Pen pen,
         int n, bool directed, int minSpace = 100, int vertRadius = 30)
     {
         Vertex[] verts = DrawVertices(graphics, clientSize, pen, n, minSpace, vertRadius);
@@ -67,6 +71,13 @@ public class GraphWindow : Form
             DrawEdges(graphics, pen, verts, n, adirMatrix, vertRadius, directed);
         else
             DrawEdges(graphics, pen, verts, n, aundirMatrix, vertRadius, directed);
+    }
+
+    public static void DrawGraph(Graphics graphics, Size clientSize, Pen pen,
+        int n, double[,] matrix, bool directed, int minSpace = 100, int vertRadius = 30)
+    {
+        Vertex[] verts = DrawVertices(graphics, clientSize, pen, n, minSpace, vertRadius);
+        DrawEdges(graphics, pen, verts, n, matrix, vertRadius, directed);
     }
 
     private static void DrawEdges(Graphics graphics, Pen pen, Vertex[] verts,
@@ -196,7 +207,7 @@ public class GraphWindow : Form
 
         matrixForm.Show();
     }
-    private static void DrawMatrix(Graphics graphics, double[,] matrix, int n, Point origin)
+    public static void DrawMatrix(Graphics graphics, double[,] matrix, int n, Point origin)
     {
         using Font font = new Font("Comic Sans MS", 10); // :)
         using SolidBrush brush = new SolidBrush(Color.Black);
@@ -211,12 +222,10 @@ public class GraphWindow : Form
                     origin.Y + x * cellSize);
             }
     }
-    private static double[,] BuildAdirMatrix(int seed, int n)
+    public static double[,] BuildAdirMatrix(int seed, int n, double k)
     {
         double[,] matrix = new double[n, n];
         Random rng = new Random(seed);
-
-        double k = 1f - 1 * 0.02f - 8 * 0.005f - 0.25f;
 
         for (int x = 0; x < n; x++)
         {
@@ -235,12 +244,10 @@ public class GraphWindow : Form
 
         return matrix;
     }
-    private static double[,] BuildAundirMatrix(int seed, int n)
+    public static double[,] BuildAundirMatrix(int seed, int n, double k)
     {
         double[,] matrix = new double[n, n];
         Random rng = new Random(seed);
-
-        double k = 1f - 1 * 0.02f - 8 * 0.005f - 0.25f;
 
         for (int x = 0; x < n; x++)
         {
