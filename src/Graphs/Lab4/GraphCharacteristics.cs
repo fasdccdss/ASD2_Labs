@@ -87,6 +87,8 @@ public class GraphCharacteristics : Form
         this.Controls.Add(graphToggle2);
         // DRAWING MATRIX2 STATS
     }
+    ///
+    // TODO: move methods below to be a part of MatrixData class, as it would make more sense 
 
     /* VERTEX DEGREES */
     // full degrees
@@ -165,11 +167,10 @@ public class GraphCharacteristics : Form
 
     /* HANGING/ISOLATED VERTICES */
     // here we return a dictionary that we can assign to smth and later draw
-    public static Dictionary<int, string> IsolatedVerts(double[,] matrix)
+    public static string[] IsolatedVerts(double[,] matrix)
     {
-        Dictionary<int, string> results = new Dictionary<int, string>();
-
         int n = matrix.GetLength(0);
+        string[] results = new string[n];
 
         for (int x = 0; x < n; x++)
         {

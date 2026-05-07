@@ -55,17 +55,21 @@ public static class UIConstructor
 
         int newX = origin.X + adirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
         Point newOrigin = new Point(newX, origin.Y);
-
+        // degrees
         string vertDegLabel = "Vertex degrees";
         DrawArray(graphics, newOrigin, vertDegLabel, "vertex", adirMatrixData.vertexDegrees); // vertex degrees
-        newOrigin.X += (int) graphics.MeasureString(vertDegLabel, defaultFont).Width;
+        newOrigin.X += (int) graphics.MeasureString(vertDegLabel, defaultFont).Width + cellSize;
 
         string vertInDegLabel = "Vertex In-degrees";
         DrawArray(graphics, newOrigin, vertInDegLabel, "vertex", adirMatrixData.vertexInDegrees); // vertex IN degrees
-        newOrigin.X += 40;
+        newOrigin.X += (int)graphics.MeasureString(vertInDegLabel, defaultFont).Width + cellSize;
 
-        DrawArray(graphics, newOrigin, "Vertex Out-degrees", "vertex", adirMatrixData.vertexOutDegrees); // vertex OUT degrees
-        newOrigin.X += 40;
+        string vertOutDegLabel = "Vertex Out-degrees";
+        DrawArray(graphics, newOrigin, vertOutDegLabel, "vertex", adirMatrixData.vertexOutDegrees); // vertex OUT degrees
+        newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
+        // regular matrix?
+        if (GraphCharacteristics.isRegular());
+        // isolated/peak/regulat vertex
 
 
         // UNDIRECTED
@@ -76,14 +80,14 @@ public static class UIConstructor
 
         origin2.X += aundirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
 
-        DrawArray(graphics, origin2, "Vertex degrees", "vertex", aundirMatrixData.vertexDegrees); // vertex degrees
-        origin2.X += 40;
+        DrawArray(graphics, origin2, vertDegLabel, "vertex", aundirMatrixData.vertexDegrees); // vertex degrees
+        origin2.X += (int)graphics.MeasureString(vertDegLabel, defaultFont).Width + cellSize;
 
-        DrawArray(graphics, origin2, "Vertex In-degrees", "vertex", aundirMatrixData.vertexInDegrees); // vertex IN degrees
-        origin2.X += 40;
+        DrawArray(graphics, origin2, vertInDegLabel, "vertex", aundirMatrixData.vertexInDegrees); // vertex IN degrees
+        origin2.X += (int)graphics.MeasureString(vertInDegLabel, defaultFont).Width + cellSize;
 
-        DrawArray(graphics, origin2, "Vertex Out-degrees", "vertex", aundirMatrixData.vertexOutDegrees); // vertex OUT degrees
-        newOrigin.X += 40;
+        DrawArray(graphics, origin2, vertOutDegLabel, "vertex", aundirMatrixData.vertexOutDegrees); // vertex OUT degrees
+        newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
 
     }
     /* MATRIX */
@@ -119,7 +123,7 @@ public static class UIConstructor
         {
             int py = origin.Y + 20 + x * cellSize;
 
-            graphics.DrawString($"{element}{x + 1}: {array[x]}", defaultFont, defaultBrush, origin.X, py);
+            graphics.DrawString($"{element} {x + 1}: {array[x]}", defaultFont, defaultBrush, origin.X, py);
         }
     }
 }
