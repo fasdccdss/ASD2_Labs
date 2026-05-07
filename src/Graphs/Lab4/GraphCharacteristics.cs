@@ -1,8 +1,6 @@
-using System.CodeDom;
+using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 
 public class GraphCharacteristics : Form
 {
@@ -32,14 +30,17 @@ public class GraphCharacteristics : Form
 
     protected override void OnPaint(PaintEventArgs e)
     {
+        double[,] matrix = GraphWindow.BuildAdirMatrix(seed, vertexCount, k1);
+        UIConstructor.DrawMatrix(e.Graphics, new Point(10, 70), "test", matrix);
         currentDraw?.Invoke(e.Graphics);
     }
 
     public void Construct()
     {
+        // MATRIX 1
         double[,] adirMatrix1 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k1);
         double[,] aundirMatrix1 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k1);
-        MatrixData matrixData1 = new MatrixData(adirMatrix1, aundirMatrix1, true, vertexCount);
+        GraphData matrixData1 = new GraphData(adirMatrix1, aundirMatrix1, true, vertexCount);
 
         Button matrixToggle1 = null;
         matrixToggle1  = UIConstructor.BuildButton("GRAPH 1", new Point(10, 10), new Size(150, 30), 
@@ -50,10 +51,12 @@ public class GraphCharacteristics : Form
             this.Invalidate();
         });
         this.Controls.Add(matrixToggle1);
+        // DRAWING MATRIX1 STATS
 
+        // MATRIX 2
         double[,] adirMatrix2 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k2);
         double[,] aundirMatrix2 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k2);
-        MatrixData matrixData2 = new MatrixData(adirMatrix2, aundirMatrix2, true, vertexCount);
+        GraphData matrixData2 = new GraphData(adirMatrix2, aundirMatrix2, true, vertexCount);
 
         Button matrixToggle2 = null;
         matrixToggle2 = UIConstructor.BuildButton("GRAPH 2", new Point(170, 10), new Size(150, 30),
@@ -64,6 +67,7 @@ public class GraphCharacteristics : Form
             this.Invalidate();
         });
         this.Controls.Add(matrixToggle2);
+        // DRAWING MATRIX2 STATS
     }
 
     /* VERTEX DEGREES */
@@ -136,10 +140,32 @@ public class GraphCharacteristics : Form
         return true;
     }
 
-    /* HANGING/ISOLATED VERTECISE */
-    public static int IsolatedVerts(double[,] matrix)
+    /* HANGING/ISOLATED VERTICES */
+    // here we return a dictionary that we can assign to smth and later draw
+    public static Dictionary<int, string> IsolatedVerts(double[,] matrix)
     {
-        
+        Dictionary<int, string> results = new Dictionary<int, string>();
+
+        int n = matrix.GetLength(0);
+
+        for (int x = 0; x < n; x++)
+        {
+            int outDegree = GetVertexOutDegree(x, matrix);
+            int inDegree = GetVertexInDegree(x, matrix);
+
+            if (outDegree == 0 && inDegree == 0)
+            {
+                results[n] = "hanging";
+            }
+            else if ((outDegree == 1 && inDegree == 0) || (outDegree == 0 && inDegree == 1))
+            {
+                results[n] = "isolated";
+            }
+            else 
+                results[n] = "regular";
+        }
+
+        return results;
     }
 
     /* MATRIX TRANSFORMATIONS */
