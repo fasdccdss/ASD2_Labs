@@ -50,6 +50,8 @@ public static class UIConstructor
         MatrixData adirMatrixData = graphData.adirMatrixData;
         MatrixData aundirMatrixData = graphData.aundirMatrixData;
 
+        DrawMatrixData(graphics, origin, "Матриця напрямленного графу", adirMatrixData, pen);
+        /*
         // DIRECTED MATRIX
         DrawMatrix(graphics, origin, "Directed matrix", adirMatrixData.matrix, cellSize); // matrix
 
@@ -68,7 +70,6 @@ public static class UIConstructor
         DrawArray(graphics, newOrigin, vertOutDegLabel, "vertex", adirMatrixData.vertexOutDegrees); // vertex OUT degrees
         newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
         // regular matrix?
-        if (GraphCharacteristics.isRegular());
         // isolated/peak/regulat vertex
 
 
@@ -88,9 +89,50 @@ public static class UIConstructor
 
         DrawArray(graphics, origin2, vertOutDegLabel, "vertex", aundirMatrixData.vertexOutDegrees); // vertex OUT degrees
         newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
+        */
 
     }
+    
     /* MATRIX */
+    public static void DrawMatrixData(Graphics graphics, Point origin, string label,
+        MatrixData matrixData, Pen pen = null, Font font = null, int cellSize = 20)
+    {
+        if (pen == null)
+            pen = new Pen(Color.Black, 2);
+        if (font == null)
+            font = defaultFont;
+
+        DrawMatrix(graphics, origin, label, matrixData.matrix, cellSize); // matrix
+
+        int newX = origin.X + matrixData.matrix.GetLength(0) * cellSize + cellSize;
+        Point newOrigin = new Point(newX, origin.Y);
+        // degrees
+        string vertDegLabel = "Степені вершин";
+        DrawArray(graphics, newOrigin, vertDegLabel, "вершина", matrixData.vertexDegrees); // vertex degrees
+        newOrigin.X += (int)graphics.MeasureString(vertDegLabel, font).Width + cellSize;
+
+        string vertInDegLabel = "Напівстепені виходу";
+        DrawArray(graphics, newOrigin, vertInDegLabel, "вершина", matrixData.vertexInDegrees); // vertex IN degrees
+        newOrigin.X += (int)graphics.MeasureString(vertInDegLabel, font).Width + cellSize;
+
+        string vertOutDegLabel = "Напівстепені виходу";
+        DrawArray(graphics, newOrigin, vertOutDegLabel, "вершина", matrixData.vertexOutDegrees); // vertex OUT degrees
+        newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, font).Width + cellSize;
+
+        // regular degree
+        string regularnessLable = "Граф є однорідним?";
+        graphics.DrawString($"{regularnessLable}", font, defaultBrush, newOrigin);
+        string answer = matrixData.isRegular ? "Так" : "Ні";
+        graphics.DrawString($"{answer}", font, defaultBrush, newOrigin.X, newOrigin.Y + cellSize);
+
+        if (matrixData.isRegular)
+        {
+            string regularDegree = matrixData.regularDegree.Value.ToString();
+            graphics.DrawString($"Степінь однорідності: {regularDegree}", 
+            defaultFont, defaultBrush, newOrigin.X, newOrigin.Y + cellSize * 2);
+        }
+    }
+
     public static void DrawMatrix<X>(Graphics graphics, Point origin, 
     string label, X[,] matrix, int cellSize = 20)
     {

@@ -1,12 +1,5 @@
+using System.Windows.Forms;
 
-public class MatrixData
-{
-    public double[,] matrix;
-
-    public int[] vertexDegrees;
-    public int[] vertexOutDegrees;
-    public int[] vertexInDegrees;
-}
 public class GraphData
 {
     public MatrixData adirMatrixData;
@@ -16,6 +9,13 @@ public class GraphData
     public int vertexCount;
 
     public GraphData() {}
+    public GraphData(MatrixData adirMatrixData, MatrixData aundirMatrixData, bool directed, int vertexCount)
+    {
+        this.adirMatrixData = adirMatrixData;
+        this.aundirMatrixData = aundirMatrixData;
+        this.directed = directed;
+        this.vertexCount = vertexCount;
+    }
     public GraphData(double[,] adirMatrix, double[,] aundirMatrix, bool directed, int vertexCount)
     {
         this.adirMatrixData = new MatrixData();

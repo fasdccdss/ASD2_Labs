@@ -35,6 +35,33 @@ public class GraphCharacteristics : Form
 
     public void Construct()
     {
+        MatrixData adirMatrixData = new MatrixData(GraphWindow.BuildAdirMatrix(seed, vertexCount, k1));
+        MatrixData aundirMatrixData = new MatrixData(GraphWindow.BuildAundirMatrix(seed, vertexCount, k1));
+
+        GraphData graphData1 = new GraphData(adirMatrixData, aundirMatrixData, true, vertexCount);
+        // GRAPH TOGGLE 1
+        Button graphToggle1 = null;
+        graphToggle1 = UIConstructor.BuildButton("GRAPH 1", new Point(10, 10), new Size(150, 30),
+        () =>
+        {
+            UIConstructor.GraphToggle(ref currentDraw, this, new Pen(Color.Black, 2), graphData1);
+            graphToggle1.Text = graphData1.directed ? "GRAPH 1 | Directed" : "GRAPH 1 | Undirected";
+            this.Invalidate();
+        });
+        this.Controls.Add(graphToggle1);
+        // STATS 1
+        Button matrixDataButton1 = null;
+        matrixDataButton1 = UIConstructor.BuildButton("DRAW MATRIX STATS", new Point(10, 45), new Size(150, 30),
+        () =>
+        {
+            UIConstructor.FuckThis(ref currentDraw, this, new Point(10, 80), graphData1);
+            this.Invalidate();
+        });
+        this.Controls.Add(matrixDataButton1);
+    }
+    /*
+    public void Construct()
+    {
         // GRAPH 1
         double[,] adirMatrix1 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k1);
         double[,] aundirMatrix1 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k1);
@@ -87,110 +114,10 @@ public class GraphCharacteristics : Form
         this.Controls.Add(graphToggle2);
         // DRAWING MATRIX2 STATS
     }
+    */
     ///
     // TODO: move methods below to be a part of MatrixData class, as it would make more sense 
 
-    /* VERTEX DEGREES */
-    // full degrees
-    public static (int[] vertexDegrees, int[] vertexInDegrees, int[] vertexOutDegrees) VertexDegreeArray(double[,] matrix)
-    {
-        int n = matrix.GetLength(0);
-
-        int[] vertexDegrees = new int[n];
-        int[] vertexInDegrees = new int[n];
-        int[] vertexOutDegrees = new int[n];
-
-        for (int x = 0; x < n; x++)
-        {
-            (vertexDegrees[x], vertexInDegrees[x], vertexOutDegrees[x]) = GetVertexDegree(x, matrix);
-        }
-
-        return (vertexDegrees, vertexInDegrees, vertexOutDegrees);
-    }
-    public static (int degree, int inDegree, int outDegree) GetVertexDegree(int vertexIndex, double[,] matrix)
-    {
-        int inDegree = GetVertexInDegree(vertexIndex, matrix);
-        int outDegree = GetVertexOutDegree(vertexIndex, matrix);
-
-        return (inDegree + outDegree, inDegree, outDegree);
-    }
-    // out-degree
-    public static int GetVertexInDegree(int vertexIndex, double[,] matrix)
-    {
-        int outDegree = 0;
-
-        for (int x = 0; x < matrix.GetLength(0); x++)
-        {
-            if (matrix[x, vertexIndex] == 1)
-            {
-                outDegree++;
-            }
-        }
-
-        return outDegree;
-    }
-    // in-degree
-    public static int GetVertexOutDegree(int vertexIndex, double[,] matrix)
-    {
-        int inDegree = 0;
-
-        for (int y = 0; y < matrix.GetLength(1); y++)
-        {
-            if (matrix[vertexIndex, y] == 1)
-            {
-                inDegree++;
-            }
-        }
-
-        return inDegree;
-    }
-    /* GRAPH REGULARNESS CHECK */
-    public static bool isRegular(double[,] matrix, out int? degree)
-    {
-        int n = matrix.GetLength(0);
-
-        int firstOut = GetVertexOutDegree(0, matrix);
-        int firstIn = GetVertexInDegree(0, matrix);
-
-        for (int x = 0; x < n; x++)
-        {
-            if (GetVertexOutDegree(x, matrix) != firstOut || GetVertexInDegree(x, matrix) != firstIn)
-            {
-                degree = null;
-                return false;
-            }
-        }
-
-        degree = firstOut;
-        return true;
-    }
-
-    /* HANGING/ISOLATED VERTICES */
-    // here we return a dictionary that we can assign to smth and later draw
-    public static string[] IsolatedVerts(double[,] matrix)
-    {
-        int n = matrix.GetLength(0);
-        string[] results = new string[n];
-
-        for (int x = 0; x < n; x++)
-        {
-            int outDegree = GetVertexOutDegree(x, matrix);
-            int inDegree = GetVertexInDegree(x, matrix);
-
-            if (outDegree == 0 && inDegree == 0)
-            {
-                results[x] = "hanging";
-            }
-            else if ((outDegree == 1 && inDegree == 0) || (outDegree == 0 && inDegree == 1))
-            {
-                results[x] = "isolated";
-            }
-            else 
-                results[x] = "regular";
-        }
-
-        return results;
-    }
-
     /* MATRIX TRANSFORMATIONS */
+
 }
