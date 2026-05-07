@@ -9,8 +9,8 @@ public class MatrixData
 }
 public class GraphData
 {
-    public MatrixData adirMatrix;
-    public MatrixData aundirMatrix;
+    public MatrixData adirMatrixData;
+    public MatrixData aundirMatrixData;
 
     public bool directed;
     public int vertexCount;
@@ -18,8 +18,11 @@ public class GraphData
     public GraphData() {}
     public GraphData(double[,] adirMatrix, double[,] aundirMatrix, bool directed, int vertexCount)
     {
-        this.adirMatrix.matrix = adirMatrix;
-        this.aundirMatrix.matrix = aundirMatrix;
+        this.adirMatrixData = new MatrixData();
+        this.aundirMatrixData = new MatrixData();
+
+        this.adirMatrixData.matrix = adirMatrix;
+        this.aundirMatrixData.matrix = aundirMatrix;
         this.directed = directed;
         this.vertexCount = vertexCount;
     }

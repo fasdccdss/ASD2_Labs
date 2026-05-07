@@ -24,29 +24,67 @@ public static class UIConstructor
     {
         graphData.directed = !graphData.directed;
 
-        double[,] matrix = graphData.directed ? graphData.adirMatrix.matrix : graphData.aundirMatrix.matrix;
+        double[,] matrix = graphData.directed ? graphData.adirMatrixData.matrix : graphData.aundirMatrixData.matrix;
 
         currentDraw = (graphics) => GraphWindow.DrawGraph(graphics, parent.ClientSize, pen,
         graphData.vertexCount, matrix, graphData.directed);
     } 
-    public static void DrawMatrixData(Graphics graphics, Point origin, GraphData matrixData, Pen pen = null, int cellSize = 20)
+    /* MATRIX */
+    public static void FuckThis(ref Action<Graphics> currentDraw, Control parent, Point origin, 
+    GraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
         {
             pen = new Pen(Color.Black, 2);
         }
-        
+
+        currentDraw = (graphics) => DrawGraphData(graphics, origin, graphData, pen, cellSize);
+    }
+    public static void DrawGraphData(Graphics graphics, Point origin, GraphData graphData, Pen pen = null, int cellSize = 20)
+    {
+        if (pen == null)
+        {
+            pen = new Pen(Color.Black, 2);
+        }
+
+        MatrixData adirMatrixData = graphData.adirMatrixData;
+        MatrixData aundirMatrixData = graphData.aundirMatrixData;
+
         // DIRECTED MATRIX
-        DrawMatrix(graphics, origin, "Directed matrix", matrixData.adirMatrix.matrix, cellSize); // matrix
+        DrawMatrix(graphics, origin, "Directed matrix", adirMatrixData.matrix, cellSize); // matrix
 
-        Point currentOrigin1 = new Point(origin.X + matrixData.adirMatrix.matrix.GetLength(0) * cellSize + cellSize, origin.Y);
-        DrawArray(graphics, currentOrigin1, "Directed vertices degrees", "vertex", matrixData.adirMatrix.vertexDegrees); // vertex degrees
+        int newX = origin.X + adirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
+        Point newOrigin = new Point(newX, origin.Y);
+
+        string vertDegLabel = "Vertex degrees";
+        DrawArray(graphics, newOrigin, vertDegLabel, "vertex", adirMatrixData.vertexDegrees); // vertex degrees
+        newOrigin.X += (int) graphics.MeasureString(vertDegLabel, defaultFont).Width;
+
+        string vertInDegLabel = "Vertex In-degrees";
+        DrawArray(graphics, newOrigin, vertInDegLabel, "vertex", adirMatrixData.vertexInDegrees); // vertex IN degrees
+        newOrigin.X += 40;
+
+        DrawArray(graphics, newOrigin, "Vertex Out-degrees", "vertex", adirMatrixData.vertexOutDegrees); // vertex OUT degrees
+        newOrigin.X += 40;
+
+
         // UNDIRECTED
-        Point origin2 = new Point(origin.X, origin.Y + matrixData.vertexCount * cellSize);
-        DrawMatrix(graphics, origin2, "Undirected matrix", matrixData.aundirMatrix.matrix); // matrix
+        int newY = origin.Y + graphData.vertexCount * cellSize + 40;
+        Point origin2 = new Point(origin.X, newY);
 
-        origin2 = new Point(origin2.X - matrixData.aundirMatrix.matrix.GetLength(0) * cellSize + cellSize, origin2.Y);
-        
+        DrawMatrix(graphics, origin2, "Undirected matrix", aundirMatrixData.matrix); // matrix
+
+        origin2.X += aundirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
+
+        DrawArray(graphics, origin2, "Vertex degrees", "vertex", aundirMatrixData.vertexDegrees); // vertex degrees
+        origin2.X += 40;
+
+        DrawArray(graphics, origin2, "Vertex In-degrees", "vertex", aundirMatrixData.vertexInDegrees); // vertex IN degrees
+        origin2.X += 40;
+
+        DrawArray(graphics, origin2, "Vertex Out-degrees", "vertex", aundirMatrixData.vertexOutDegrees); // vertex OUT degrees
+        newOrigin.X += 40;
+
     }
     /* MATRIX */
     public static void DrawMatrix<X>(Graphics graphics, Point origin, 

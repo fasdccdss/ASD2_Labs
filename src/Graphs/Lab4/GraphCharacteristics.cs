@@ -30,64 +30,87 @@ public class GraphCharacteristics : Form
 
     protected override void OnPaint(PaintEventArgs e)
     {
-        double[,] matrix = GraphWindow.BuildAdirMatrix(seed, vertexCount, k1);
-        UIConstructor.DrawMatrix(e.Graphics, new Point(10, 70), "test", matrix);
         currentDraw?.Invoke(e.Graphics);
     }
 
     public void Construct()
     {
-        // MATRIX 1
+        // GRAPH 1
         double[,] adirMatrix1 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k1);
         double[,] aundirMatrix1 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k1);
-        GraphData matrixData1 = new GraphData(adirMatrix1, aundirMatrix1, true, vertexCount);
+        GraphData graphData1 = new GraphData(adirMatrix1, aundirMatrix1, true, vertexCount);
 
-        Button matrixToggle1 = null;
-        matrixToggle1  = UIConstructor.BuildButton("GRAPH 1", new Point(10, 10), new Size(150, 30), 
+        Button graphToggle1 = null;
+        graphToggle1  = UIConstructor.BuildButton("GRAPH 1", new Point(10, 10), new Size(150, 30), 
         () => 
         {
-            UIConstructor.GraphToggle(ref currentDraw, this, new Pen(Color.Black, 2), matrixData1);
-            matrixToggle1.Text = matrixData1.directed ? "GRAPH 1 | Directed" : "GRAPH 1 | Undirected";
+            UIConstructor.GraphToggle(ref currentDraw, this, new Pen(Color.Black, 2), graphData1);
+            graphToggle1.Text = graphData1.directed ? "GRAPH 1 | Directed" : "GRAPH 1 | Undirected";
             this.Invalidate();
         });
-        this.Controls.Add(matrixToggle1);
-        // DRAWING MATRIX1 STATS
+        this.Controls.Add(graphToggle1);
+        // DEGREES
+        // directional matrix
+        MatrixData adirMatrixData = graphData1.adirMatrixData;
 
-        // MATRIX 2
+        (adirMatrixData.vertexDegrees, adirMatrixData.vertexInDegrees, adirMatrixData.vertexOutDegrees)
+        = VertexDegreeArray(adirMatrixData.matrix);
+        // undirectional matrix
+        MatrixData aundirMatrixData = graphData1.aundirMatrixData;
+
+        (aundirMatrixData.vertexDegrees, aundirMatrixData.vertexInDegrees, aundirMatrixData.vertexOutDegrees)
+        = VertexDegreeArray(aundirMatrixData.matrix);
+
+        // DRAWING GRAPH 1 STATS
+        Button matrixDataButton1 = null;
+        matrixDataButton1 = UIConstructor.BuildButton("DRAW MATRIX STATS", new Point(10, 45), new Size(150, 30),
+        () =>
+        {
+            UIConstructor.FuckThis(ref currentDraw, this, new Point(10, 80), graphData1);
+            this.Invalidate();
+        });
+        this.Controls.Add(matrixDataButton1);
+
+        // GRAPH 2
         double[,] adirMatrix2 = GraphWindow.BuildAdirMatrix(seed, vertexCount, k2);
         double[,] aundirMatrix2 = GraphWindow.BuildAundirMatrix(seed, vertexCount, k2);
         GraphData matrixData2 = new GraphData(adirMatrix2, aundirMatrix2, true, vertexCount);
 
-        Button matrixToggle2 = null;
-        matrixToggle2 = UIConstructor.BuildButton("GRAPH 2", new Point(170, 10), new Size(150, 30),
+        Button graphToggle2 = null;
+        graphToggle2 = UIConstructor.BuildButton("GRAPH 2", new Point(170, 10), new Size(150, 30),
         () => 
         {
             UIConstructor.GraphToggle(ref currentDraw, this, new Pen(Color.Black, 2), matrixData2);
-            matrixToggle2.Text = matrixData2.directed ? "GRAPH 2 | Directed" : "GRAPH 2 | Undirected";
+            graphToggle2.Text = matrixData2.directed ? "GRAPH 2 | Directed" : "GRAPH 2 | Undirected";
             this.Invalidate();
         });
-        this.Controls.Add(matrixToggle2);
+        this.Controls.Add(graphToggle2);
         // DRAWING MATRIX2 STATS
     }
 
     /* VERTEX DEGREES */
     // full degrees
-    public static int[] VertexDegreeArray(double[,] matrix)
+    public static (int[] vertexDegrees, int[] vertexInDegrees, int[] vertexOutDegrees) VertexDegreeArray(double[,] matrix)
     {
         int n = matrix.GetLength(0);
 
         int[] vertexDegrees = new int[n];
+        int[] vertexInDegrees = new int[n];
+        int[] vertexOutDegrees = new int[n];
 
         for (int x = 0; x < n; x++)
         {
-            vertexDegrees[x] = GetVertexDegree(x, matrix);
+            (vertexDegrees[x], vertexInDegrees[x], vertexOutDegrees[x]) = GetVertexDegree(x, matrix);
         }
 
-        return vertexDegrees;
+        return (vertexDegrees, vertexInDegrees, vertexOutDegrees);
     }
-    public static int GetVertexDegree(int vertexIndex, double[,] matrix)
+    public static (int degree, int inDegree, int outDegree) GetVertexDegree(int vertexIndex, double[,] matrix)
     {
-        return GetVertexInDegree(vertexIndex, matrix) + GetVertexOutDegree(vertexIndex, matrix);
+        int inDegree = GetVertexInDegree(vertexIndex, matrix);
+        int outDegree = GetVertexOutDegree(vertexIndex, matrix);
+
+        return (inDegree + outDegree, inDegree, outDegree);
     }
     // out-degree
     public static int GetVertexInDegree(int vertexIndex, double[,] matrix)
@@ -155,14 +178,14 @@ public class GraphCharacteristics : Form
 
             if (outDegree == 0 && inDegree == 0)
             {
-                results[n] = "hanging";
+                results[x] = "hanging";
             }
             else if ((outDegree == 1 && inDegree == 0) || (outDegree == 0 && inDegree == 1))
             {
-                results[n] = "isolated";
+                results[x] = "isolated";
             }
             else 
-                results[n] = "regular";
+                results[x] = "regular";
         }
 
         return results;
