@@ -28,9 +28,9 @@ public static class UIConstructor
 
         currentDraw = (graphics) => GraphWindow.DrawGraph(graphics, parent.ClientSize, pen,
         graphData.vertexCount, matrix, graphData.directed);
-    } 
-    /* MATRIX */
-    public static void FuckThis(ref Action<Graphics> currentDraw, Control parent, Point origin, 
+    }
+    /* FUNCTIONS FOR DRAWING FIRST GRAPH  */
+    public static void FuckThis(ref Action<Graphics> currentDraw, Point origin, 
     GraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
@@ -47,49 +47,81 @@ public static class UIConstructor
             pen = new Pen(Color.Black, 2);
         }
 
-        MatrixData adirMatrixData = graphData.adirMatrixData;
-        MatrixData aundirMatrixData = graphData.aundirMatrixData;
+        MatrixData dirMatrixData = graphData.adirMatrixData;
+        MatrixData undirMatrixData = graphData.aundirMatrixData;
 
-        DrawMatrixData(graphics, origin, "Матриця напрямленного графу", adirMatrixData, pen);
-        /*
-        // DIRECTED MATRIX
-        DrawMatrix(graphics, origin, "Directed matrix", adirMatrixData.matrix, cellSize); // matrix
+        DrawMatrixData(graphics, origin, "Матриця напрямленного графу", dirMatrixData, pen);
 
-        int newX = origin.X + adirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
-        Point newOrigin = new Point(newX, origin.Y);
-        // degrees
-        string vertDegLabel = "Vertex degrees";
-        DrawArray(graphics, newOrigin, vertDegLabel, "vertex", adirMatrixData.vertexDegrees); // vertex degrees
-        newOrigin.X += (int) graphics.MeasureString(vertDegLabel, defaultFont).Width + cellSize;
-
-        string vertInDegLabel = "Vertex In-degrees";
-        DrawArray(graphics, newOrigin, vertInDegLabel, "vertex", adirMatrixData.vertexInDegrees); // vertex IN degrees
-        newOrigin.X += (int)graphics.MeasureString(vertInDegLabel, defaultFont).Width + cellSize;
-
-        string vertOutDegLabel = "Vertex Out-degrees";
-        DrawArray(graphics, newOrigin, vertOutDegLabel, "vertex", adirMatrixData.vertexOutDegrees); // vertex OUT degrees
-        newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
-        // regular matrix?
-        // isolated/peak/regulat vertex
-
-
-        // UNDIRECTED
         int newY = origin.Y + graphData.vertexCount * cellSize + 40;
-        Point origin2 = new Point(origin.X, newY);
+        Point newOrigin = new Point(origin.X, newY);
 
-        DrawMatrix(graphics, origin2, "Undirected matrix", aundirMatrixData.matrix); // matrix
+        DrawMatrixData(graphics, newOrigin, "Матриця ненапрямленного графу", undirMatrixData, pen);
+    }
+    /* FUNCTIONS FOR DRAWING SECOND GRAPH */
+    public static void DrawDirGraphDataAction(ref Action<Graphics> currentDraw, Point origin,
+        GraphData graphData, Pen pen = null, int cellSize = 20)
+    {
+        if (pen == null)
+        {
+            pen = new Pen(Color.Black, 2);
+        }
 
-        origin2.X += aundirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
+        currentDraw = (graphics) => DrawDirGraphData(graphics, origin, graphData, pen, cellSize);
+    }
+    private static void DrawDirGraphData(Graphics graphics, Point origin, GraphData graphData, Pen pen = null, int cellSize = 20)
+    {
+        if (pen == null)
+        {
+            pen = new Pen(Color.Black, 2);
+        }
 
-        DrawArray(graphics, origin2, vertDegLabel, "vertex", aundirMatrixData.vertexDegrees); // vertex degrees
-        origin2.X += (int)graphics.MeasureString(vertDegLabel, defaultFont).Width + cellSize;
+        MatrixData dirMatrixData = graphData.adirMatrixData;
 
-        DrawArray(graphics, origin2, vertInDegLabel, "vertex", aundirMatrixData.vertexInDegrees); // vertex IN degrees
-        origin2.X += (int)graphics.MeasureString(vertInDegLabel, defaultFont).Width + cellSize;
+        DrawMatrix(graphics, origin, "Матриця напрямленного графу", dirMatrixData.matrix, cellSize);
+        int newX = origin.X + dirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
+        origin.X += newX;
 
-        DrawArray(graphics, origin2, vertOutDegLabel, "vertex", aundirMatrixData.vertexOutDegrees); // vertex OUT degrees
-        newOrigin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
+        // degrees
+        string vertDegLabel = "Степені вершин";
+        DrawArray(graphics, origin, vertDegLabel, "вершина", dirMatrixData.vertexDegrees); // vertex degrees
+        origin.X += (int)graphics.MeasureString(vertDegLabel, defaultFont).Width + cellSize;
+
+        string vertInDegLabel = "Напівстепені виходу";
+        DrawArray(graphics, origin, vertInDegLabel, "вершина", dirMatrixData.vertexInDegrees); // vertex IN degrees
+        origin.X += (int)graphics.MeasureString(vertInDegLabel, defaultFont).Width + cellSize;
+
+        string vertOutDegLabel = "Напівстепені виходу";
+        DrawArray(graphics, origin, vertOutDegLabel, "вершина", dirMatrixData.vertexOutDegrees); // vertex OUT degrees
+        origin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
+        // PATHS LENGTH 2
+        string pathsLabel2 = "шляхи довжини 2";
+        List<string> pathsLength2 = MatrixOperations.FindPaths(dirMatrixData.matrix, 2);
+        DrawList(graphics, origin, "шляхи довжини 2", "", pathsLength2);
+        /*
+        int maxWidth1 = 0;
+        for (int x = 0; x < pathsLength2.Count; x++)
+        {
+            int currentWidth = (int)graphics.MeasureString(pathsLength2[x], defaultFont).Width;
+            if (currentWidth > maxWidth1)
+                maxWidth1 = currentWidth + 20;
+        }
         */
+        origin.X += (int)graphics.MeasureString(pathsLabel2, defaultFont).Width;
+        // PATHS LENGTH 3
+        string pathsLabel3 = "шляхи довжини 3";
+        List<string> pathsLength3 = MatrixOperations.FindPaths(dirMatrixData.matrix, 3);
+        DrawList(graphics, origin, pathsLabel3, "", pathsLength3);
+        /*
+        int maxWidth2 = 0;
+        for (int x = 0; x < pathsLength2.Count; x++)
+        {
+            int currentWidth = (int)graphics.MeasureString(pathsLength2[x], defaultFont).Width;
+            if (currentWidth > maxWidth2)
+                maxWidth2 = currentWidth + 20;
+        }
+        */
+        origin.X += (int)graphics.MeasureString(pathsLabel3, defaultFont).Width;
+
 
     }
     
@@ -131,6 +163,11 @@ public static class UIConstructor
             graphics.DrawString($"Степінь однорідності: {regularDegree}", 
             defaultFont, defaultBrush, newOrigin.X, newOrigin.Y + cellSize * 2);
         }
+
+        newOrigin.X += (int)graphics.MeasureString(regularnessLable, font).Width + cellSize;
+
+        string isolatedLable = "Ізольвані/висячі вершини";
+        DrawArray(graphics, newOrigin, isolatedLable, "вершина", matrixData.isolatedVerts);
     }
 
     public static void DrawMatrix<X>(Graphics graphics, Point origin, 
@@ -166,6 +203,19 @@ public static class UIConstructor
             int py = origin.Y + 20 + x * cellSize;
 
             graphics.DrawString($"{element} {x + 1}: {array[x]}", defaultFont, defaultBrush, origin.X, py);
+        }
+    }
+    /* LIST */
+    public static void DrawList<X>(Graphics graphics, Point origin,
+    string label, string element, List<X> list, int cellSize = 20)
+    {
+        graphics.DrawString(label, defaultFont, defaultBrush, origin.X, origin.Y); // DRAW LABEL
+
+        for (int x = 0; x < list.Count; x++)
+        {
+            int py = origin.Y + 20 + x * cellSize;
+
+            graphics.DrawString($"{element} {x + 1}: {list[x]}", defaultFont, defaultBrush, origin.X, py);
         }
     }
 }
