@@ -269,13 +269,13 @@ public class GraphWindow : Form
     }
     /* DRAWING HELPERS */
     private static Vertex[] DrawVertices(Graphics graphics, Size clientSize, Pen pen,
-        int n, int minSpace = 100, int vertRadius = 30)
+        int rows, int columns, int minSpace = 100, int vertRadius = 30)
     {
-        int minRows = 3;
-        int minColumns = 3;
-        int minEdges = 2 * (minRows + minColumns) - 4; // 8
+        int minRows = 2;
+        int minColumns = 2;
+        int minEdges = 2 * (rows + columns) - 4; // 8
 
-        int vertices = n - 1;
+        int vertices = 2 * (rows + columns) - 4; ;
 
         int maxRows = minRows;
         int lRows = minRows;
@@ -342,7 +342,7 @@ public class GraphWindow : Form
         int right = left + rectWidth;
         int bottom = top + rectHeight;
         //
-        Vertex[] verts = new Vertex[n];
+        Vertex[] verts = new Vertex[vertices];
         int idx = 0;
         // placing vertices
         // top edge

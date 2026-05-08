@@ -33,7 +33,7 @@ public static class UIConstructor
         graphData.vertexCount, matrix, graphData.directed);
     }
     /* FUNCTIONS FOR DRAWING FIRST GRAPH  */
-    public static void FuckThis(ref Action<Graphics> currentDraw, Point origin, 
+    public static void DrawGraphAction(ref Action<Graphics> currentDraw, Point origin, 
     GraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
@@ -80,9 +80,28 @@ public static class UIConstructor
 
         MatrixData dirMatrixData = graphData.adirMatrixData;
 
+        // dir matrix
         DrawMatrix(graphics, origin, "Матриця напрямленного графу", dirMatrixData.matrix, cellSize);
+
+        // reachability matrix
         int newX = origin.X + dirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
+        int newY = origin.Y + dirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
+        Point point = new Point (origin.X, newY);
+
+        double[,] reachabilityMatrix = MatrixOperations.ReachabilityMatrix(graphData.adirMatrixData.matrix);
+        DrawMatrix(graphics, point, "Матриця досяжності", reachabilityMatrix, cellSize);
+        // strong connectivity matrix
+        newY += reachabilityMatrix.GetLength(0) * cellSize + cellSize;
+        point = new Point(origin.X, newY);
+
+        double[,] strongConnectivityMatrix = MatrixOperations.StrongConnectivity(reachabilityMatrix);
+        DrawMatrix(graphics, point, "Матриця сильної зв’язностi", strongConnectivityMatrix, cellSize);
+
         origin.X += newX;
+
+        // strong connectivity components
+        List<string> strongConnectivityComponents = MatrixOperations.StrongComponentsList(strongConnectivityMatrix);
+        DrawList(graphics, new Point(origin.X, point.Y), "Компоненти сильної зв’язностi", "", strongConnectivityComponents);
 
         // degrees
         string vertDegLabel = "Степені вершин";

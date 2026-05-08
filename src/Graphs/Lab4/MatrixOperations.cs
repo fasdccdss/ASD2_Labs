@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 public static class MatrixOperations
 {
@@ -152,7 +149,7 @@ public static class MatrixOperations
 
         return results;
     }
-
+    /* power */
     public static double[,] Power(double[,] matrix, int power)
     {
         double[,] result = (double[,])matrix.Clone();
@@ -164,6 +161,7 @@ public static class MatrixOperations
 
         return result;
     }
+    /* multiply */
     public static double[,] Multiply(double[,] matrixA, double[,] matrixB)
     {
         int rows = matrixA.GetLength(0);
@@ -182,5 +180,97 @@ public static class MatrixOperations
         }
 
         return result;
+    }
+
+    /* CALCULATING REACHABILITY MATRIX */
+    public static double[,] ReachabilityMatrix(double[,] matrix)
+    {
+        int n = matrix.GetLength(0);
+        double[,] result = (double[,])matrix.Clone();
+
+        // each vertex reaches itself
+        for (int i = 0; i < n; i++)
+            result[i, i] = 1;
+
+        // orshals algorithm
+        for (int k = 0; k < n; k++)
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    if (result[i, k] == 1 && result[k, j] == 1)
+                        result[i, j] = 1;
+
+        return result;
+    }
+
+    /* STRONG CONNECTIVITY MATRIX */
+    public static double[,] StrongConnectivity(double[,] reachabilityMatrix)
+    {
+        int n = reachabilityMatrix.GetLength(0);
+        double[,] result = new double[n, n];
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (reachabilityMatrix[i, j] == 1 && reachabilityMatrix[j, i] == 1)
+                    result[i, j] = 1;
+
+        return result;
+    }
+    public static List<string> StrongComponentsList(double[,] strongConnectivityMatrix)
+    {
+        int n = strongConnectivityMatrix.GetLength(0);
+        bool[] visited = new bool[n];
+        List<string> components = new List<string>();
+
+        for (int i = 0; i < n; i++)
+        {
+            if (visited[i]) continue;
+
+            List<int> component = new List<int>();
+            for (int j = 0; j < n; j++)
+                if (strongConnectivityMatrix[i, j] == 1)
+                {
+                    component.Add(j + 1);
+                    visited[j] = true;
+                }
+
+            components.Add("{ " + string.Join(", ", component) + " }");
+        }
+
+        return components;
+    }
+    public static int[] StrongComponenetsArray(double[,] strongConnectivityMatrix)
+    {
+        int n = strongConnectivityMatrix.GetLength(0);
+        bool[] visited = new bool[n];
+        int[] vertexComponent = new int[n];
+        int componentIndex = 0;
+
+        for (int i = 0; i < n; i++)
+        {
+            if (visited[i]) continue;
+            for (int j = 0; j < n; j++)
+                if (strongConnectivityMatrix[i, j] == 1)
+                {
+                    vertexComponent[j] = componentIndex;
+                    visited[j] = true;
+                }
+            componentIndex++;
+        }
+
+        return vertexComponent;
+    }
+    /* CONDENSATION MATRIX */
+    public static double[,] CondensationMatrix(double[,] matrix, double[,] strongConnectivityMatrix)
+    {
+        int[] vertexComponent = StrongComponenetsArray(strongConnectivityMatrix);
+        int count = vertexComponent.Max() + 1;
+        double[,] condensation = new double[count, count];
+
+        for (int i = 0; i < matrix.GetLength(0); i++)
+            for (int j = 0; j < matrix.GetLength(1); j++)
+                if (matrix[i, j] == 1 && vertexComponent[i] != vertexComponent[j])
+                    condensation[vertexComponent[i], vertexComponent[j]] = 1;
+
+        return condensation;
     }
 }

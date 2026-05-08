@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -54,7 +54,7 @@ public class GraphCharacteristics : Form
         matrixDataButton1 = UIConstructor.BuildButton("DRAW GRAPH 1 STATS", new Point(10, 45), new Size(150, 30),
         () =>
         {
-            UIConstructor.FuckThis(ref currentDraw, new Point(10, 80), graphData1);
+            UIConstructor.DrawGraphAction(ref currentDraw, new Point(10, 80), graphData1);
             this.Invalidate();
         });
         this.Controls.Add(matrixDataButton1);
@@ -83,5 +83,17 @@ public class GraphCharacteristics : Form
             this.Invalidate();
         });
         this.Controls.Add(matrixDataButton2);
+
+        // CONDENSATION GRAPH
+        Button condesationGraphButton = null;
+        condesationGraphButton = UIConstructor.BuildButton("DRAW CONDENSATION GRAPH", new Point(320, 10), new Size(150, 30), 
+        () =>
+        {
+            Console.WriteLine(adirMatrixData2.condensationMatrix.GetLength(0));
+            currentDraw = (graphics) => GraphWindow.DrawGraph(graphics, ClientSize, new Pen(Color.Black, 2),
+                adirMatrixData2.condensationMatrix.GetLength(0), adirMatrixData2.condensationMatrix, true);
+            this.Invalidate();
+        });
+        this.Controls.Add(condesationGraphButton);
     }
 }
