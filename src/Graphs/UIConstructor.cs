@@ -87,6 +87,8 @@ public static class UIConstructor
         int newX = origin.X + dirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
         int newY = origin.Y + dirMatrixData.matrix.GetLength(0) * cellSize + cellSize;
         Point point = new Point (origin.X, newY);
+        // condensation matrix
+        DrawMatrix(graphics, new Point(newX, newY), "Матриця конденсації", dirMatrixData.condensationMatrix, cellSize);
 
         double[,] reachabilityMatrix = MatrixOperations.ReachabilityMatrix(graphData.adirMatrixData.matrix);
         DrawMatrix(graphics, point, "Матриця досяжності", reachabilityMatrix, cellSize);
