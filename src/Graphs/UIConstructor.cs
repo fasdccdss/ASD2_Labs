@@ -7,7 +7,10 @@ public static class UIConstructor
 {
     public static Color highlightColor = Color.PaleGreen;
     public static Color unactiveColor = Color.WhiteSmoke;
-    private static readonly Font defaultFont = new Font("Arial", 9);
+    private static readonly Font defaultFont = new Font("Ariel", 9);
+    private static readonly Font highlightFont = new Font("Consolas", 9, FontStyle.Bold);
+
+    private static readonly Brush highlightBrush = Brushes.Red;
     private static readonly Brush defaultBrush = Brushes.Black;
 
     public static Button BuildButton(string label, Point location, Size size, Action onClick)
@@ -94,35 +97,14 @@ public static class UIConstructor
         DrawArray(graphics, origin, vertOutDegLabel, "вершина", dirMatrixData.vertexOutDegrees); // vertex OUT degrees
         origin.X += (int)graphics.MeasureString(vertOutDegLabel, defaultFont).Width + cellSize;
         // PATHS LENGTH 2
-        string pathsLabel2 = "шляхи довжини 2";
         List<string> pathsLength2 = MatrixOperations.FindPaths(dirMatrixData.matrix, 2);
-        DrawList(graphics, origin, "шляхи довжини 2", "", pathsLength2);
-        /*
-        int maxWidth1 = 0;
-        for (int x = 0; x < pathsLength2.Count; x++)
-        {
-            int currentWidth = (int)graphics.MeasureString(pathsLength2[x], defaultFont).Width;
-            if (currentWidth > maxWidth1)
-                maxWidth1 = currentWidth + 20;
-        }
-        */
-        origin.X += (int)graphics.MeasureString(pathsLabel2, defaultFont).Width;
+        DrawList(graphics, origin, "шляхи довжини 2", "", pathsLength2, cellSize);
+
+        int Y = origin.Y + 25 * 9 + cellSize;
+        Point newOrigin = new Point(origin.X, Y);
         // PATHS LENGTH 3
-        string pathsLabel3 = "шляхи довжини 3";
         List<string> pathsLength3 = MatrixOperations.FindPaths(dirMatrixData.matrix, 3);
-        DrawList(graphics, origin, pathsLabel3, "", pathsLength3);
-        /*
-        int maxWidth2 = 0;
-        for (int x = 0; x < pathsLength2.Count; x++)
-        {
-            int currentWidth = (int)graphics.MeasureString(pathsLength2[x], defaultFont).Width;
-            if (currentWidth > maxWidth2)
-                maxWidth2 = currentWidth + 20;
-        }
-        */
-        origin.X += (int)graphics.MeasureString(pathsLabel3, defaultFont).Width;
-
-
+        DrawList(graphics, newOrigin, "шляхи довжини 3", "", pathsLength3, cellSize, 32);
     }
     
     /* MATRIX */
@@ -207,15 +189,39 @@ public static class UIConstructor
     }
     /* LIST */
     public static void DrawList<X>(Graphics graphics, Point origin,
-    string label, string element, List<X> list, int cellSize = 20)
+    string label, string element, List<X> list, int cellSize = 20, int heightBreak = 11)
     {
         graphics.DrawString(label, defaultFont, defaultBrush, origin.X, origin.Y); // DRAW LABEL
 
+        int breakCounter = 0;
+
+        int maxWidth = 0;
+
         for (int x = 0; x < list.Count; x++)
         {
-            int py = origin.Y + 20 + x * cellSize;
+            if (breakCounter == heightBreak)
+            {
+                breakCounter = 0;
+                origin.X += maxWidth;
+                maxWidth = 0;
+            }
 
-            graphics.DrawString($"{element} {x + 1}: {list[x]}", defaultFont, defaultBrush, origin.X, py);
+            string indexText = $"{element}{x + 1}";
+            string elementText = $": { list[x]}";
+
+            int indexTextWidth = (int)graphics.MeasureString(indexText, defaultFont).Width;
+
+            int textWidth = (int)graphics.MeasureString($"{element} {x + 1}: {list[x]}", defaultFont).Width;
+
+            if (textWidth > maxWidth)
+                maxWidth = textWidth + 20;
+
+            int py = origin.Y + 20 + breakCounter * cellSize;
+
+            graphics.DrawString(indexText, highlightFont, highlightBrush, origin.X, py);
+            graphics.DrawString(elementText, defaultFont, defaultBrush, origin.X + indexTextWidth, py);
+
+            breakCounter++;
         }
     }
 }

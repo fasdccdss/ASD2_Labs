@@ -24,7 +24,7 @@ public class GraphCharacteristics : Form
         this.Location = new Point(100, 100);
         this.Size = new Size(840, 640);
 
-        this.BackColor = Color.GhostWhite;
+        this.BackColor = Color.WhiteSmoke;
         Construct();
     }
 
