@@ -14,7 +14,7 @@ public class GraphCharacteristics : Form
     static double k1 = 1.0 - n3 * 0.01 - n4 * 0.01 - 0.03;
     static double k2 = 1.0 - n3 * 0.005 - n4 * 0.005 - 0.27;
 
-    static System.Action<Graphics> currentDraw;
+    static Action<Graphics> currentDraw;
 
 
     public GraphCharacteristics()
