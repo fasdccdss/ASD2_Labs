@@ -1,6 +1,6 @@
 using System.Windows.Forms;
 
-public class GraphData
+public class AltGraphData
 {
     public MatrixData adirMatrixData;
     public MatrixData aundirMatrixData;
@@ -8,15 +8,15 @@ public class GraphData
     public bool directed;
     public int vertexCount;
 
-    public GraphData() {}
-    public GraphData(MatrixData adirMatrixData, MatrixData aundirMatrixData, bool directed, int vertexCount)
+    public AltGraphData() {}
+    public AltGraphData(MatrixData adirMatrixData, MatrixData aundirMatrixData, bool directed, int vertexCount)
     {
         this.adirMatrixData = adirMatrixData;
         this.aundirMatrixData = aundirMatrixData;
         this.directed = directed;
         this.vertexCount = vertexCount;
     }
-    public GraphData(double[,] adirMatrix, double[,] aundirMatrix, bool directed, int vertexCount)
+    public AltGraphData(double[,] adirMatrix, double[,] aundirMatrix, bool directed, int vertexCount)
     {
         this.adirMatrixData = new MatrixData();
         this.aundirMatrixData = new MatrixData();

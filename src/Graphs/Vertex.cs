@@ -15,6 +15,11 @@ public class Vertex
     {
         this.index = index;
     }
+    public Vertex(int index, int radius)
+    {
+        this.index = index;
+        this.radius = radius;
+    }
     public Vertex(int centerX, int centerY, int radius)
     {
         center.X = centerX;

@@ -23,7 +23,7 @@ public static class UIConstructor
         btn.Click += (s, e) => onClick();
         return btn;
     }
-    public static void GraphToggle(ref Action<Graphics> currentDraw, Control parent, Pen pen, GraphData graphData)
+    public static void GraphToggle(ref Action<Graphics> currentDraw, Control parent, Pen pen, AltGraphData graphData)
     {
         graphData.directed = !graphData.directed;
 
@@ -34,7 +34,7 @@ public static class UIConstructor
     }
     /* FUNCTIONS FOR DRAWING FIRST GRAPH  */
     public static void DrawGraphAction(ref Action<Graphics> currentDraw, Point origin, 
-    GraphData graphData, Pen pen = null, int cellSize = 20)
+    AltGraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
         {
@@ -43,7 +43,7 @@ public static class UIConstructor
 
         currentDraw = (graphics) => DrawGraphData(graphics, origin, graphData, pen, cellSize);
     }
-    public static void DrawGraphData(Graphics graphics, Point origin, GraphData graphData, Pen pen = null, int cellSize = 20)
+    public static void DrawGraphData(Graphics graphics, Point origin, AltGraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
         {
@@ -62,7 +62,7 @@ public static class UIConstructor
     }
     /* FUNCTIONS FOR DRAWING SECOND GRAPH */
     public static void DrawDirGraphDataAction(ref Action<Graphics> currentDraw, Point origin,
-        GraphData graphData, Pen pen = null, int cellSize = 20)
+        AltGraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
         {
@@ -71,7 +71,7 @@ public static class UIConstructor
 
         currentDraw = (graphics) => DrawDirGraphData(graphics, origin, graphData, pen, cellSize);
     }
-    private static void DrawDirGraphData(Graphics graphics, Point origin, GraphData graphData, Pen pen = null, int cellSize = 20)
+    private static void DrawDirGraphData(Graphics graphics, Point origin, AltGraphData graphData, Pen pen = null, int cellSize = 20)
     {
         if (pen == null)
         {

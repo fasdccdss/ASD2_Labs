@@ -38,7 +38,7 @@ public class GraphCharacteristics : Form
         MatrixData adirMatrixData = new MatrixData(GraphWindow.BuildAdirMatrix(seed, vertexCount, k1));
         MatrixData aundirMatrixData = new MatrixData(GraphWindow.BuildAundirMatrix(seed, vertexCount, k1));
 
-        GraphData graphData1 = new GraphData(adirMatrixData, aundirMatrixData, true, vertexCount);
+        AltGraphData graphData1 = new AltGraphData(adirMatrixData, aundirMatrixData, true, vertexCount);
         // GRAPH TOGGLE 1
         Button graphToggle1 = null;
         graphToggle1 = UIConstructor.BuildButton("GRAPH 1", new Point(10, 10), new Size(150, 30),
@@ -63,7 +63,7 @@ public class GraphCharacteristics : Form
         MatrixData adirMatrixData2 = new MatrixData(GraphWindow.BuildAdirMatrix(seed, vertexCount, k2));
         MatrixData aundirMatrixData2 = new MatrixData(GraphWindow.BuildAundirMatrix(seed, vertexCount, k2));
 
-        GraphData graphData2 = new GraphData(adirMatrixData2, aundirMatrixData2, true, vertexCount);
+        AltGraphData graphData2 = new AltGraphData(adirMatrixData2, aundirMatrixData2, true, vertexCount);
         // GRAPH TOGGLE 2
         Button graphToggle2 = null;
         graphToggle2 = UIConstructor.BuildButton("GRAPH 2", new Point(160, 10), new Size(150, 30),
