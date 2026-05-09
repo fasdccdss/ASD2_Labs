@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 
 public class MatrixData
 {
+    List<Vertex> vertices;
+
+
     public double[,] matrix;
     public double[,] reachabilityMatrix;
     public double[,] strongConnectivityMatrix;

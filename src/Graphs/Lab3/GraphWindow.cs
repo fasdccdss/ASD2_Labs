@@ -4,26 +4,6 @@ using System.Drawing;
 using System.Reflection.Metadata;
 using System.Windows.Forms;
 
-struct Vertex
-{
-    public Point center;
-    public int radius;
-
-
-    public Vertex(int centerX, int centerY, int radius)
-    {
-        center.X = centerX;
-        center.Y = centerY;
-        this.radius = radius;
-    }
-
-    public bool Intersects(Point p)
-    {
-        int dx = p.X - center.X, dy = p.Y - center.Y;
-        return dx * dx + dy * dy <= radius * radius;
-    }
-}
-
 public class GraphWindow : Form
 {
     static bool showDirected = true;
