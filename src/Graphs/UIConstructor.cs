@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection.Emit;
 using System.Windows.Forms;
 
 public static class UIConstructor
@@ -23,6 +24,17 @@ public static class UIConstructor
         btn.Click += (s, e) => onClick();
         return btn;
     }
+    public static void BuildButton(string label, Control parent, Point location, Size size, Action onClick)
+    {
+        Button btn = new Button();
+        btn.Text = label;
+        btn.Location = location;
+        btn.Size = size;
+        btn.BackColor = unactiveColor;
+        btn.Click += (s, e) => onClick();
+        parent.Controls.Add(btn);
+    }
+
     public static void GraphToggle(ref Action<Graphics> currentDraw, Control parent, Pen pen, AltGraphData graphData)
     {
         graphData.directed = !graphData.directed;

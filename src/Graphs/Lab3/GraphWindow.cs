@@ -248,7 +248,7 @@ public class GraphWindow : Form
         return matrix;
     }
     /* DRAWING HELPERS */
-    private static Vertex[] DrawVertices(Graphics graphics, Size clientSize, Pen pen,
+    public static Vertex[] DrawVertices(Graphics graphics, Size clientSize, Pen pen,
         int vertexCount, int minSpace = 100, int vertRadius = 30)
     {
         int minRows = 2;

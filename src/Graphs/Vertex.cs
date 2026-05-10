@@ -1,11 +1,28 @@
 using System.Collections.Generic;
 using System.Drawing;
 
+public enum VertexState { Unvisited, InQueue, Visited }
+
 public class Vertex
 {
+    public VertexState state;
+
+    public Color FillColor() => state switch
+    {
+        VertexState.InQueue => Color.DimGray,
+        VertexState.Visited => Color.Black,
+        _ => Color.White
+    };
+    public Color FontColor() => state switch
+    {
+        VertexState.InQueue => Color.Black,
+        VertexState.Visited => Color.White,
+        _ => Color.Black,
+    };
+
     public int index;
-    public List<Vertex> previous; // stores vertices that point to this one
-    public List<Vertex> next; // stores vertices that this one is pointing to
+    public List<Vertex> previous = new List<Vertex>(); // stores vertices that point to this one
+    public List<Vertex> next = new List<Vertex>(); // stores vertices that this one is pointing to
 
     public Point center;
     public int radius;

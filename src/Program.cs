@@ -47,7 +47,10 @@ class Program
         // Application.Run(new GraphWindow());
 
         /* LAB 4 */
-        Application.Run(new GraphCharacteristics());
+        // Application.Run(new GraphCharacteristics());
+
+        /* LAB 5 */
+        Application.Run(new GraphBypass());
     }
-    
+
 }

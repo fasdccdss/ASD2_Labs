@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing.Drawing2D;
+using System.Drawing;
 
 public class MatrixData
 {
@@ -24,6 +24,7 @@ public class MatrixData
         this.matrix = matrix;
         ComputeStats();
     }
+
     public void ComputeStats()
     {
         if (matrix == null)
@@ -41,5 +42,4 @@ public class MatrixData
         strongConnectivityMatrix = MatrixOperations.StrongConnectivity(matrix);
         condensationMatrix = MatrixOperations.CondensationMatrix(matrix, strongConnectivityMatrix);
     }
-
 }
