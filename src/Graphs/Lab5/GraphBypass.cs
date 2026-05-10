@@ -9,7 +9,9 @@ public class GraphBypass : Form
     static double[,] dirMatrix = GraphWindow.BuildAdirMatrix(GraphParams.seed, GraphParams.vertexCount, k);
     List<Vertex> vertices;
 
-    int startIndex = 0;
+    static int startIndex = 0;
+    int runtimeIndex = startIndex;
+
     Queue<Vertex> bfsQueue = new Queue<Vertex>();
     Queue<Vertex> dfsQueue = new Queue<Vertex>();
 
@@ -24,24 +26,40 @@ public class GraphBypass : Form
 
         this.BackColor = Color.WhiteSmoke;
 
-        vertices = GraphConstructor.BuildVertexData(dirMatrix, ClientSize);
+        vertices = GraphConstructor.BuildVertexData(dirMatrix);
 
         UIConstructor.BuildButton("BFS STEP", this, new Point(10, 10), new Size(150, 30), 
         () =>
         {
-           PerformBfsStep(vertices, ref startIndex); 
+           PerformBfsStep(vertices, ref runtimeIndex); 
         });
     }
     protected override void OnPaint(PaintEventArgs e)
     {
-        GraphConstructor.DrawGraph(vertices, e.Graphics);
+        GraphConstructor.DrawGraph(vertices, e.Graphics, ClientSize, true, 30, 60);
     }
 
-    private DataGridViewTopLeftHeaderCell 
+    /* REFRESH */
+    private void RefreshGraph()
+    {
+        for (int x = 0; x < vertices.Count; x++)
+        {
+            vertices[x].state = VertexState.Unvisited;
+
+            bfsQueue.Enqueue(vertices[x]);
+            dfsQueue.Enqueue(vertices[x]);
+        }
+
+        current = null;
+        runtimeIndex = 0;
+    }
 
     // that's the bad one, here because instead of using a pre-populated queue
-    private void PerformBfsStep(List<Vertex> vertices, ref int startIndex)
+    private void PerformBfsStep(List<Vertex> vertices, ref int runtimeIndex)
     {
+        if (runtimeIndex > vertices.Count)
+            runtimeIndex = startIndex;
+
         if (bfsQueue.Count != 0)
         {
             for (int x = 0; x < current.next.Count; x++)
@@ -59,10 +77,10 @@ public class GraphBypass : Form
         }
         else
         {
-            bfsQueue.Enqueue(vertices[startIndex]);
+            bfsQueue.Enqueue(vertices[runtimeIndex]);
             current = bfsQueue.Peek();
             current.state = VertexState.InQueue;
-            startIndex++;
+            runtimeIndex++;
             // bfsQueue.Peek().state = VertexState.InQueue;
             /*
             if (vertices[startIndex].next.Count == 0)
