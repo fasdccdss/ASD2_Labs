@@ -9,7 +9,7 @@ public class Vertex
 
     public Color FillColor() => state switch
     {
-        VertexState.InQueue => Color.DimGray,
+        VertexState.InQueue => Color.Gray,
         VertexState.Visited => Color.Black,
         _ => Color.White
     };

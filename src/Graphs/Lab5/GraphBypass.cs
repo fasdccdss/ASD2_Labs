@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -12,6 +13,7 @@ public class GraphBypass : Form
     static int startIndex = 0;
     int runtimeIndex = startIndex;
 
+    List<Vertex> visited = new List<Vertex>();
     Queue<Vertex> bfsQueue = new Queue<Vertex>();
     Queue<Vertex> dfsQueue = new Queue<Vertex>();
 
@@ -28,70 +30,85 @@ public class GraphBypass : Form
 
         vertices = GraphConstructor.BuildVertexData(dirMatrix);
 
+        RefreshGraph();
+
         UIConstructor.BuildButton("BFS STEP", this, new Point(10, 10), new Size(150, 30), 
         () =>
         {
            PerformBfsStep(vertices, ref runtimeIndex); 
         });
+        UIConstructor.BuildButton("RE-FRESH SEARCH", this, new Point(160, 10), new Size(150, 30),
+        () =>
+        {
+            RefreshGraph();
+        });
     }
     protected override void OnPaint(PaintEventArgs e)
     {
-        GraphConstructor.DrawGraph(vertices, e.Graphics, ClientSize, true, 30, 60);
+        GraphConstructor.DrawGraph(vertices, e.Graphics, ClientSize, true, 50, 90);
     }
 
     /* REFRESH */
     private void RefreshGraph()
     {
+        bfsQueue.Clear();
+        dfsQueue.Clear();
+
         for (int x = 0; x < vertices.Count; x++)
         {
             vertices[x].state = VertexState.Unvisited;
 
-            bfsQueue.Enqueue(vertices[x]);
-            dfsQueue.Enqueue(vertices[x]);
+            // bfsQueue.Enqueue(vertices[x]);
+            // dfsQueue.Enqueue(vertices[x]);
         }
 
         current = null;
         runtimeIndex = 0;
+        Invalidate();
     }
-
-    // that's the bad one, here because instead of using a pre-populated queue
-    private void PerformBfsStep(List<Vertex> vertices, ref int runtimeIndex)
+    /* SEARCHES */
+    // we start with a queue full of white vertices,
+    // at the start we will take a vertex at (runtimeIndex) and we will
+    // mark it for the enque and move it to the beginning
+    // we want to dequeue a visited vertex
+    private void PerformBfsStep(List<Vertex> vertices, ref int index)
     {
-        if (runtimeIndex > vertices.Count)
-            runtimeIndex = startIndex;
+        if (index > vertices.Count)
+        {
+            Console.WriteLine("can't perform BFS further, refresh");
+            return;
+        }
 
         if (bfsQueue.Count != 0)
         {
             for (int x = 0; x < current.next.Count; x++)
             {
-                if (current.next[x].state != VertexState.Visited)
-                {
-                    bfsQueue.Enqueue(current.next[x]);
-                    current.next[x].state = VertexState.InQueue;
-                }
+                if (current.next[x].state != VertexState.Unvisited || current == current.next[x])
+                    continue;
+
+                bfsQueue.Enqueue(current.next[x]);
+                current.next[x].state = VertexState.InQueue;
             }
 
             current.state = VertexState.Visited;
             bfsQueue.Dequeue(); // Dequeue current
-            current = bfsQueue.Peek();
+            bfsQueue.TryPeek(out current); // using TryPeak() in case Queue is empty after Dequeue
         }
         else
         {
-            bfsQueue.Enqueue(vertices[runtimeIndex]);
+            if (vertices[index].state != VertexState.Unvisited)
+            {
+                index++;
+                PerformBfsStep(vertices, ref index);
+                return;
+            }
+
+            bfsQueue.Enqueue(vertices[index]);
             current = bfsQueue.Peek();
             current.state = VertexState.InQueue;
-            runtimeIndex++;
-            // bfsQueue.Peek().state = VertexState.InQueue;
-            /*
-            if (vertices[startIndex].next.Count == 0)
-            {
-                bfsQueue.Peek().state = VertexState.Visited;
-                bfsQueue.Dequeue();
-                startIndex++;
-            }
-            */
         }
 
+        index++;
         Invalidate();
     }
     private void PerformDfsStep()
