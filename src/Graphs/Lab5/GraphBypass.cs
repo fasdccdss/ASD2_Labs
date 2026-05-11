@@ -15,7 +15,9 @@ public class GraphBypass : Form
 
     List<Vertex> visited = new List<Vertex>();
     Queue<Vertex> bfsQueue = new Queue<Vertex>();
-    Queue<Vertex> dfsQueue = new Queue<Vertex>();
+    Stack<Vertex> dfsStack = new Stack<Vertex>();
+
+    bool bfsMode;
 
     Vertex current = null;
 
@@ -32,11 +34,18 @@ public class GraphBypass : Form
 
         RefreshGraph();
 
-        UIConstructor.BuildButton("BFS STEP", this, new Point(10, 10), new Size(150, 30), 
+        Button bfsStepBtn = UIConstructor.BuildButton("BFS STEP", this, new Point(10, 10), new Size(150, 30), 
         () =>
         {
            PerformBfsStep(vertices, ref runtimeIndex); 
         });
+
+        Button dfsStepBtn = UIConstructor.BuildButton("DFS STEP", this, new Point(10, 60), new Size(150, 30),
+        () =>
+        {
+            PerformDfsStep(vertices, ref runtimeIndex);
+        });
+
         UIConstructor.BuildButton("RE-FRESH SEARCH", this, new Point(160, 10), new Size(150, 30),
         () =>
         {
@@ -52,7 +61,7 @@ public class GraphBypass : Form
     private void RefreshGraph()
     {
         bfsQueue.Clear();
-        dfsQueue.Clear();
+        dfsStack.Clear();
 
         for (int x = 0; x < vertices.Count; x++)
         {
@@ -111,8 +120,59 @@ public class GraphBypass : Form
         index++;
         Invalidate();
     }
-    private void PerformDfsStep()
+    private void PerformDfsStep(List<Vertex> vertices, ref int index)
     {
-        
+        if (index > vertices.Count)
+        {
+            Console.WriteLine("can't perform DFS further, refresh");
+            return;
+        }
+
+        if (dfsStack.Count != 0)
+        {
+
+            dfsStack.Pop();
+            current.state = VertexState.Visited;
+
+            if (current.next.Count != 0)
+            {
+                for (int x = current.next.Count - 1; x > 0; x--)
+                {
+                    if (current.next[x].state != VertexState.Unvisited || current == current.next[x])
+                    {
+                        continue;
+                    }
+
+                    dfsStack.Push(current.next[x]);
+                    vertices[x].state = VertexState.InQueue;
+                }
+            }
+            // if stack is still empty, we can't proceed to call Peek,
+            // so we instead call the method recursively, because it will fall back into an
+            // else condition, because "dfsStack.Count == 0"
+            if (dfsStack.Count == 0)
+            {
+                PerformDfsStep(vertices, ref index);
+                return;
+            }
+
+            current = dfsStack.Peek();
+        }
+        else
+        {
+            if (vertices[index].state != VertexState.Unvisited)
+            {
+                index++;
+                PerformDfsStep(vertices, ref index);
+                return;
+            }
+
+            dfsStack.Push(vertices[index]);
+            current = dfsStack.Peek();
+            current.state = VertexState.InQueue;
+        }
+
+        index++;
+        Invalidate();
     }
 }

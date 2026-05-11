@@ -24,7 +24,7 @@ public static class UIConstructor
         btn.Click += (s, e) => onClick();
         return btn;
     }
-    public static void BuildButton(string label, Control parent, Point location, Size size, Action onClick)
+    public static Button BuildButton(string label, Control parent, Point location, Size size, Action onClick)
     {
         Button btn = new Button();
         btn.Text = label;
@@ -33,6 +33,7 @@ public static class UIConstructor
         btn.BackColor = unactiveColor;
         btn.Click += (s, e) => onClick();
         parent.Controls.Add(btn);
+        return btn;
     }
 
     public static void GraphToggle(ref Action<Graphics> currentDraw, Control parent, Pen pen, AltGraphData graphData)
