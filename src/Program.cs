@@ -50,7 +50,10 @@ class Program
         // Application.Run(new GraphCharacteristics());
 
         /* LAB 5 */
-        Application.Run(new GraphBypass());
+        // Application.Run(new GraphBypass());
+
+        /* LAB 6 */
+        Application.Run(new SpanningTree());
     }
 
 }

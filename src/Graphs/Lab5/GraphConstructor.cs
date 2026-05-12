@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Xml.Serialization;
 
 public class GraphConstructor
 {
@@ -139,6 +140,40 @@ public class GraphConstructor
                 {
                     vertices[x].next.Add(vertices[y]);
                     vertices[y].previous.Add(vertices[x]);
+                }
+            }
+        }
+
+        return vertices;
+    }
+    // this method expects an undirectional matrix as first argument and
+    // both matrices to be of the same size
+    public static List<Vertex> BuildVertexData(double[,] matrix, double[,] weightMatrix)
+    {
+        int vertexCount = matrix.GetLength(0);
+
+        List<Vertex> vertices = new List<Vertex>(vertexCount);
+
+        for (int x = 0; x < vertexCount; x++)
+        {
+            vertices.Add(new Vertex(x + 1));
+        }
+
+        // because matrix is undirectional we want to prevent any duplicates in
+        // nextV and previousV so we need to store values that we already cycled through and
+        // skip adding anything to the mirrored values
+        HashSet<(int row, int column)> cycledPairs = new HashSet<(int, int)>();
+
+        for (int x = 0; x < vertexCount; x++)
+        {
+            for (int y = 0; y < vertexCount; y++)
+            {
+                if (matrix[x, y] == 1 && !cycledPairs.Contains((y, x)))
+                {
+                    vertices[x].nextV.Add(vertices[y], weightMatrix[x, y]);
+                    vertices[y].previousV.Add(vertices[x], weightMatrix[y, x]);
+
+                    cycledPairs.Add((x, y));
                 }
             }
         }

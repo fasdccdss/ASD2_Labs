@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 
-public class SpanningTree
+public class SpanningTree : Form
 {
     static readonly double k = 1 - GraphParams.n3 * 0.01 - GraphParams.n4 * 0.005 - 0.05;
 
@@ -15,6 +18,20 @@ public class SpanningTree
 
     static double[,] W = BuildW(GraphParams.vertexCount);
 
+    static List<Vertex> vertices = GraphConstructor.BuildVertexData(undirMatrix, W);
+
+
+    public SpanningTree()
+    {
+        
+    }
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        UIConstructor.DrawMatrix(e.Graphics, new Point(10, 10), "Undirectional matrix", undirMatrix, 40);
+        UIConstructor.DrawMatrix(e.Graphics, new Point(500, 10), "Weight matrix", W, 40);
+    }
+
+    /* BUILDING MATRICES */
     private static double[,] BuildW(int vertexCount)
     {
         double[,] W = new double[vertexCount, vertexCount];

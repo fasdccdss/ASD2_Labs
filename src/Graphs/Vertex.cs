@@ -24,6 +24,11 @@ public class Vertex
     public List<Vertex> previous = new List<Vertex>(); // stores vertices that point to this one
     public List<Vertex> next = new List<Vertex>(); // stores vertices that this one is pointing to
 
+    // in lab 6 it is best for collections "previous" and "next" to be Dictionaries,
+    // as we would be able to store both the next Vertex and its Weight in relation to *this* vertex
+    public Dictionary<Vertex, double> previousV;
+    public Dictionary<Vertex, double> nextV;
+
     public Point center;
     public int radius;
 
