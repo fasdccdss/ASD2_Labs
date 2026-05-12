@@ -24,9 +24,14 @@ public class GraphBypass : Form
     List<(Vertex vertex, string label)> stepLabels = new List<(Vertex, string)>();
     Dictionary<Color, SolidBrush> fillBrushes = new Dictionary<Color, SolidBrush>();
     Dictionary<Color, SolidBrush> fontBrushes = new Dictionary<Color, SolidBrush>();
+
     // DEBUG DRAWING
     Font font = new Font("Arial", 21);
     SolidBrush brush = new SolidBrush(Color.Black);
+
+    // tast specific
+    double[,] treeMatrix;
+    List<int> newIndices;
 
     public GraphBypass()
     {
@@ -95,6 +100,14 @@ public class GraphBypass : Form
             fontBrushes[vertex.FontColor()],
             vertex.center.X - size.Width / 2, vertex.center.Y - size.Height / 2);
         }
+
+        UIConstructor.DrawList(e.Graphics, new Point(10, 100),
+        "Список вiдповiдностi номерiв вершин i їх нової нумерацiї, на-бутої в процесi обходу",
+        "", newIndices);
+
+        UIConstructor.DrawMatrix(e.Graphics, new Point(10, 350),
+         "Згенерована матриця сумiжностi напрямленого графа", dirMatrix);
+        UIConstructor.DrawMatrix(e.Graphics, new Point(10, 620), "Матриця сумiжностi дерева обходу", treeMatrix);
     }
 
     /* POPULATING DRAWING DICTIONARIES */
@@ -131,8 +144,11 @@ public class GraphBypass : Form
         
         stepLabels.Clear();
 
+        treeMatrix = new double[vertices.Count, vertices.Count];
+        newIndices = new List<int>();
+
         current = null;
-        runtimeIndex = 0;
+        runtimeIndex = startIndex;
         Invalidate();
     }
     /* SEARCHES */
@@ -154,6 +170,8 @@ public class GraphBypass : Form
 
                 bfsQueue.Enqueue(current.next[x]);
                 current.next[x].state = VertexState.InQueue;
+                
+                treeMatrix[current.index - 1, current.next[x].index - 1] = 1; // TASK SPECIFIC, CAN REMOVE
             }
 
             current.state = VertexState.Visited;
@@ -175,7 +193,11 @@ public class GraphBypass : Form
             current.state = VertexState.InQueue;
         }
 
+        if (current != null) //
+            newIndices.Add(current.index); // TASK SPECIFIC, CAN REMOVE
+
         index++;
+
         if (current != null)
             stepLabels.Add((current, index.ToString())); // drawing
         // Console.WriteLine(index);
@@ -214,6 +236,8 @@ public class GraphBypass : Form
 
                 dfsStack.Push(current.next[x]);
                 dfsStack.Peek().state = VertexState.InQueue;
+
+                treeMatrix[current.index - 1, current.next[x].index - 1] = 1; // TASK SPECIFIC, CAN REMOVE
             }
 
             // after the initial "Pop" stack might be empty and a raw Peek would throw an error
@@ -235,9 +259,11 @@ public class GraphBypass : Form
             current.state = VertexState.InQueue;
         }
 
-        
+        if (current != null)  //
+            newIndices.Add(current.index); // TASK SPECIFIC, CAN REMOVE
 
         index++;
+
         if (current != null)
             stepLabels.Add((current, index.ToString())); // drawing
         // Console.WriteLine(index);
