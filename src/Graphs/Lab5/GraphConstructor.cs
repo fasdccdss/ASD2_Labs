@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.Design;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Reflection.PortableExecutable;
 
 public class GraphConstructor
 {
@@ -15,6 +11,8 @@ public class GraphConstructor
     */ 
 
     /* DRAWING */
+    public static Pen arrowPen = new Pen(Color.Red, 2);
+
     public static void DrawGraph(List<Vertex> vertices, Graphics graphics, Size clientSize, bool directed = true,
         int vertexRadius = 60, int vertexOffset = 90, Font font = null, SolidBrush solidBrush = null, Pen pen = null)
     {
@@ -184,7 +182,7 @@ public class GraphConstructor
                 }
 
                 if (directed)
-                    DrawBrokenArrow(graphics, pen, start, breaks, end);
+                    DrawBrokenArrow(graphics, pen, start, breaks, end, arrowPen);
                 else
                     DrawBrokenLine(graphics, pen, start, breaks, end);
             }
@@ -214,22 +212,27 @@ public class GraphConstructor
         );
     }
 
-    private static void DrawBrokenArrow(Graphics graphics, Pen pen,
-        Point start, Point?[] breaks, Point end)
+    private static void DrawBrokenArrow(Graphics graphics, Pen linePen,
+        Point start, Point?[] breaks, Point end, Pen arrowPen = null)
     {
+        if (arrowPen == null)
+        {
+            arrowPen = linePen;
+        }
+
         Point lastPoint = start;
         for (int x = 0; x < breaks.Length; x++)
         {
             if (breaks[x] != null)
             {
-                graphics.DrawLine(pen, lastPoint, breaks[x].Value);
+                graphics.DrawLine(linePen, lastPoint, breaks[x].Value);
                 lastPoint = breaks[x].Value;
             }
         }
         float arrowAngle = MathF.Atan2(end.Y - lastPoint.Y, end.X - lastPoint.X) * 180f / MathF.PI;
 
-        graphics.DrawLine(pen, lastPoint, end);
-        ArrowHead(graphics, pen, arrowAngle, end);
+        graphics.DrawLine(linePen, lastPoint, end);
+        ArrowHead(graphics, arrowPen, arrowAngle, end);
     }
     private static void DrawBrokenLine(Graphics graphics, Pen pen,
     Point start, Point?[] breaks, Point end)
@@ -254,14 +257,14 @@ public class GraphConstructor
     }
 
     private static void ArrowHead(Graphics graphics, Pen pen, float angle,
-     Point tip)
+     Point tip, float arrowSize = 20)
     {
         angle = 3.1416f * (180f + angle) / 180f;
 
-        int lx = tip.X + (int)(15 * MathF.Cos(angle + 0.3f));
-        int rx = tip.X + (int)(15 * MathF.Cos(angle - 0.3f));
-        int ly = tip.Y + (int)(15 * MathF.Sin(angle + 0.3f));
-        int ry = tip.Y + (int)(15 * MathF.Sin(angle - 0.3f));
+        int lx = tip.X + (int)(arrowSize * MathF.Cos(angle + 0.3f));
+        int rx = tip.X + (int)(arrowSize * MathF.Cos(angle - 0.3f));
+        int ly = tip.Y + (int)(arrowSize * MathF.Sin(angle + 0.3f));
+        int ry = tip.Y + (int)(arrowSize * MathF.Sin(angle - 0.3f));
 
         graphics.DrawLine(pen, lx, ly, tip.X, tip.Y);
         graphics.DrawLine(pen, tip.X, tip.Y, rx, ry);

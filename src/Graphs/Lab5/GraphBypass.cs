@@ -21,6 +21,10 @@ public class GraphBypass : Form
 
     Vertex current = null;
 
+    // DEBUG DRAWING
+    Font font = new Font("Arial", 9);
+    SolidBrush brush = new SolidBrush(Color.Black);
+
     public GraphBypass()
     {
         this.Text = "Lab 4";
@@ -55,6 +59,15 @@ public class GraphBypass : Form
     protected override void OnPaint(PaintEventArgs e)
     {
         GraphConstructor.DrawGraph(vertices, e.Graphics, ClientSize, true, 50, 90);
+        
+        int px = 10;
+        int py = 100;
+
+        foreach (Vertex v in dfsStack)
+        {
+            e.Graphics.DrawString(v.index.ToString(), font, brush, px, py);
+            py += 10;
+        }
     }
 
     /* REFRESH */
@@ -76,10 +89,6 @@ public class GraphBypass : Form
         Invalidate();
     }
     /* SEARCHES */
-    // we start with a queue full of white vertices,
-    // at the start we will take a vertex at (runtimeIndex) and we will
-    // mark it for the enque and move it to the beginning
-    // we want to dequeue a visited vertex
     private void PerformBfsStep(List<Vertex> vertices, ref int index)
     {
         if (index > vertices.Count)
@@ -107,6 +116,7 @@ public class GraphBypass : Form
         {
             if (vertices[index].state != VertexState.Unvisited)
             {
+                Console.WriteLine(index);
                 index++;
                 PerformBfsStep(vertices, ref index);
                 return;
@@ -118,8 +128,11 @@ public class GraphBypass : Form
         }
 
         index++;
+        // Console.WriteLine(index);
         Invalidate();
     }
+
+    /* DFS */
     private void PerformDfsStep(List<Vertex> vertices, ref int index)
     {
         if (index > vertices.Count)
@@ -130,33 +143,37 @@ public class GraphBypass : Form
 
         if (dfsStack.Count != 0)
         {
-
             dfsStack.Pop();
             current.state = VertexState.Visited;
 
-            if (current.next.Count != 0)
+            if (current.next.Count == 0)
             {
-                for (int x = current.next.Count - 1; x > 0; x--)
-                {
-                    if (current.next[x].state != VertexState.Unvisited || current == current.next[x])
-                    {
-                        continue;
-                    }
-
-                    dfsStack.Push(current.next[x]);
-                    vertices[x].state = VertexState.InQueue;
-                }
-            }
-            // if stack is still empty, we can't proceed to call Peek,
-            // so we instead call the method recursively, because it will fall back into an
-            // else condition, because "dfsStack.Count == 0"
-            if (dfsStack.Count == 0)
-            {
-                PerformDfsStep(vertices, ref index);
+                // after the initial "Pop" stack might be empty and a raw Pop would throw an error
+                // thats why there's a TryPop
+                dfsStack.TryPop(out current);
+                current.state = VertexState.Visited;
                 return;
             }
 
-            current = dfsStack.Peek();
+            for (int x = current.next.Count - 1; x >= 0; x--) // condition is purpousful. DO NOT REWRITE
+            {
+                if (current.next[x].state != VertexState.Unvisited || current == current.next[x])
+                {
+                    continue;
+                }
+
+                dfsStack.Push(current.next[x]);
+                dfsStack.Peek().state = VertexState.InQueue;
+            }
+            
+            if (current.next.Count != 0)
+            {
+
+            }
+
+            // after the initial "Pop" stack might be empty and a raw Peek would throw an error
+            // thats why there's a TryPeek
+            dfsStack.TryPeek(out current);
         }
         else
         {
@@ -166,6 +183,7 @@ public class GraphBypass : Form
                 PerformDfsStep(vertices, ref index);
                 return;
             }
+            
 
             dfsStack.Push(vertices[index]);
             current = dfsStack.Peek();
@@ -173,6 +191,7 @@ public class GraphBypass : Form
         }
 
         index++;
+        // Console.WriteLine(index);
         Invalidate();
     }
 }
