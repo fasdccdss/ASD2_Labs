@@ -8,11 +8,11 @@ public class GraphConstructor
     to build full graph information we need to scan the adjacency matrix and build 
     vertices from this matrix, those vertices would also store information about 
     what vertices they are pointing at 
-    */ 
+    */
 
-    /* DRAWING */
     public static Pen arrowPen = new Pen(Color.Red, 2);
 
+    /* DRAWING */
     public static void DrawGraph(List<Vertex> vertices, Graphics graphics, Size clientSize, bool directed = true,
         int vertexRadius = 60, int vertexOffset = 90, Font font = null, SolidBrush solidBrush = null, Pen pen = null)
     {
@@ -23,33 +23,70 @@ public class GraphConstructor
         if (pen == null)
             pen = new Pen(Color.Black, 2);
         
-        Dictionary<Color, SolidBrush> fillBrushs = new Dictionary<Color, SolidBrush>();
-        Dictionary<Color, SolidBrush> fontBrushs = new Dictionary<Color, SolidBrush>();
+        Dictionary<Color, SolidBrush> fillBrushes = new Dictionary<Color, SolidBrush>();
+        Dictionary<Color, SolidBrush> fontBrushes = new Dictionary<Color, SolidBrush>();
 
         for (int x = 0; x < vertices.Count; x++)
         {
             Color fillColor = vertices[x].FillColor();
-            if (!fillBrushs.ContainsKey(fillColor))
+            if (!fillBrushes.ContainsKey(fillColor))
             {
-                fillBrushs.Add(fillColor, new SolidBrush(fillColor));
+                fillBrushes.Add(fillColor, new SolidBrush(fillColor));
             }
 
             Color fontColor = vertices[x].FontColor();
-            if (!fontBrushs.ContainsKey(fontColor))
+            if (!fontBrushes.ContainsKey(fontColor))
             {
-                fontBrushs.Add(fontColor, new SolidBrush(fontColor));
+                fontBrushes.Add(fontColor, new SolidBrush(fontColor));
             }
 
-            graphics.FillEllipse(fillBrushs[fillColor], vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
+            graphics.FillEllipse(fillBrushes[fillColor], vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
                 2 * vertexRadius, 2 * vertexRadius);
             
             graphics.DrawEllipse(pen, vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
                 2 * vertexRadius, 2 * vertexRadius);
 
             SizeF textSize = graphics.MeasureString(vertices[x].index.ToString(), font);
-            graphics.DrawString(vertices[x].index.ToString(), font, fontBrushs[fontColor],
+            graphics.DrawString(vertices[x].index.ToString(), font, fontBrushes[fontColor],
                 vertices[x].center.X - textSize.Width / 2,
                 vertices[x].center.Y - textSize.Height / 2);
+        }
+
+        PositionVertices(vertices, clientSize, vertexOffset);
+        DrawEdges(graphics, pen, vertices, vertexRadius, directed);
+    }
+
+    /* */
+    public static void DrawGraphNoIndex(List<Vertex> vertices, Graphics graphics, Size clientSize, bool directed = true,
+        int vertexRadius = 60, int vertexOffset = 90, SolidBrush solidBrush = null, Pen pen = null)
+    {
+        if (solidBrush == null)
+            solidBrush = new SolidBrush(Color.Black);
+        if (pen == null)
+            pen = new Pen(Color.Black, 2);
+
+        Dictionary<Color, SolidBrush> fillBrushes = new Dictionary<Color, SolidBrush>();
+        Dictionary<Color, SolidBrush> fontBrushes = new Dictionary<Color, SolidBrush>();
+
+        for (int x = 0; x < vertices.Count; x++)
+        {
+            Color fillColor = vertices[x].FillColor();
+            if (!fillBrushes.ContainsKey(fillColor))
+            {
+                fillBrushes.Add(fillColor, new SolidBrush(fillColor));
+            }
+
+            Color fontColor = vertices[x].FontColor();
+            if (!fontBrushes.ContainsKey(fontColor))
+            {
+                fontBrushes.Add(fontColor, new SolidBrush(fontColor));
+            }
+
+            graphics.FillEllipse(fillBrushes[fillColor], vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
+                2 * vertexRadius, 2 * vertexRadius);
+
+            graphics.DrawEllipse(pen, vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
+                2 * vertexRadius, 2 * vertexRadius);
         }
 
         PositionVertices(vertices, clientSize, vertexOffset);

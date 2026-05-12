@@ -13,16 +13,19 @@ public class GraphBypass : Form
     static int startIndex = 0;
     int runtimeIndex = startIndex;
 
-    List<Vertex> visited = new List<Vertex>();
     Queue<Vertex> bfsQueue = new Queue<Vertex>();
     Stack<Vertex> dfsStack = new Stack<Vertex>();
-
-    bool bfsMode;
+    
+    int modeIndex = 0; // for tracking which algorithm user chose to perform
 
     Vertex current = null;
 
+    // storing information for drawing indexes of the vertices
+    List<(Vertex vertex, string label)> stepLabels = new List<(Vertex, string)>();
+    Dictionary<Color, SolidBrush> fillBrushes = new Dictionary<Color, SolidBrush>();
+    Dictionary<Color, SolidBrush> fontBrushes = new Dictionary<Color, SolidBrush>();
     // DEBUG DRAWING
-    Font font = new Font("Arial", 9);
+    Font font = new Font("Arial", 21);
     SolidBrush brush = new SolidBrush(Color.Black);
 
     public GraphBypass()
@@ -35,18 +38,34 @@ public class GraphBypass : Form
         this.BackColor = Color.WhiteSmoke;
 
         vertices = GraphConstructor.BuildVertexData(dirMatrix);
+        PopulateDrawingDictionaries(vertices);
 
         RefreshGraph();
 
         Button bfsStepBtn = UIConstructor.BuildButton("BFS STEP", this, new Point(10, 10), new Size(150, 30), 
         () =>
         {
-           PerformBfsStep(vertices, ref runtimeIndex); 
+            if (modeIndex == 0)
+                modeIndex = 1;
+            else if (modeIndex != 1)
+            {
+                Console.WriteLine("can't perform BFS step along with DFS");
+                return;
+            }
+            PerformBfsStep(vertices, ref runtimeIndex); 
         });
 
         Button dfsStepBtn = UIConstructor.BuildButton("DFS STEP", this, new Point(10, 60), new Size(150, 30),
         () =>
         {
+            if (modeIndex == 0)
+                modeIndex = 2;
+            else if (modeIndex != 2)
+            {
+                Console.WriteLine("can't perform DFS step along with BFS");
+                return;
+            }
+
             PerformDfsStep(vertices, ref runtimeIndex);
         });
 
@@ -58,21 +77,47 @@ public class GraphBypass : Form
     }
     protected override void OnPaint(PaintEventArgs e)
     {
-        GraphConstructor.DrawGraph(vertices, e.Graphics, ClientSize, true, 50, 90);
-        
+        GraphConstructor.DrawGraphNoIndex(vertices, e.Graphics, ClientSize, true, 50, 90);
+
         int px = 10;
         int py = 100;
 
         foreach (Vertex v in dfsStack)
         {
             e.Graphics.DrawString(v.index.ToString(), font, brush, px, py);
-            py += 10;
+            py += 24;
+        }
+
+        foreach (var (vertex, label) in stepLabels)
+        {
+            SizeF size = e.Graphics.MeasureString(label, font);
+            e.Graphics.DrawString(label, font,
+            fontBrushes[vertex.FontColor()],
+            vertex.center.X - size.Width / 2, vertex.center.Y - size.Height / 2);
+        }
+    }
+
+    /* POPULATING DRAWING DICTIONARIES */
+    private void PopulateDrawingDictionaries(List<Vertex> vertices)
+    {
+        foreach (VertexState state in Enum.GetValues<VertexState>())
+        {
+            Vertex temp = new Vertex { state = state };
+
+            Color fillColor = temp.FillColor();
+            if (!fillBrushes.ContainsKey(fillColor))
+                fillBrushes.Add(fillColor, new SolidBrush(fillColor));
+
+            Color fontColor = temp.FontColor();
+            if (!fontBrushes.ContainsKey(fontColor))
+                fontBrushes.Add(fontColor, new SolidBrush(fontColor));
         }
     }
 
     /* REFRESH */
     private void RefreshGraph()
     {
+        modeIndex = 0;
         bfsQueue.Clear();
         dfsStack.Clear();
 
@@ -83,12 +128,15 @@ public class GraphBypass : Form
             // bfsQueue.Enqueue(vertices[x]);
             // dfsQueue.Enqueue(vertices[x]);
         }
+        
+        stepLabels.Clear();
 
         current = null;
         runtimeIndex = 0;
         Invalidate();
     }
     /* SEARCHES */
+    /* BFS */
     private void PerformBfsStep(List<Vertex> vertices, ref int index)
     {
         if (index > vertices.Count)
@@ -128,6 +176,8 @@ public class GraphBypass : Form
         }
 
         index++;
+        if (current != null)
+            stepLabels.Add((current, index.ToString())); // drawing
         // Console.WriteLine(index);
         Invalidate();
     }
@@ -165,11 +215,6 @@ public class GraphBypass : Form
                 dfsStack.Push(current.next[x]);
                 dfsStack.Peek().state = VertexState.InQueue;
             }
-            
-            if (current.next.Count != 0)
-            {
-
-            }
 
             // after the initial "Pop" stack might be empty and a raw Peek would throw an error
             // thats why there's a TryPeek
@@ -190,7 +235,11 @@ public class GraphBypass : Form
             current.state = VertexState.InQueue;
         }
 
+        
+
         index++;
+        if (current != null)
+            stepLabels.Add((current, index.ToString())); // drawing
         // Console.WriteLine(index);
         Invalidate();
     }
