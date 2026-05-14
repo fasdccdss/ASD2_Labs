@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 public class SpanningTree : Form
@@ -22,11 +21,13 @@ public class SpanningTree : Form
     static List<Vertex> vertices = GraphConstructor.BuildVertexData(undirMatrix, W);
 
     // being populated at runtime by each step of building a spanning tree
-    List<Vertex> spanningTree = new List<Vertex>();
-    static List<Edge> treeEdges = new List<Edge>(); 
-    
+    static List<Vertex> spanningTree = new List<Vertex>();
+    static List<Edge> treeEdges = new List<Edge>();
+
+    static double weightSum = 0;
+
     // drawing
-    Pen treeEdgePen = new Pen(Color.RoyalBlue, 4);
+    Pen treeEdgePen = new Pen(Color.Blue, 6);
     Pen treeVertexPen = new Pen(Color.Red, 6);
     //
     int currentStep = 0;
@@ -51,7 +52,7 @@ public class SpanningTree : Form
     {
         UIConstructor.DrawMatrix(e.Graphics, new Point(10, 50), "Undirectional matrix", undirMatrix, 40);
         UIConstructor.DrawMatrix(e.Graphics, new Point(10, 540), "Weight matrix", W, 40);
-        GraphConstructor.DrawGraph(vertices, e.Graphics, ClientSize, false, 40, 60);
+        WeightGraph.DrawWeightGraph(vertices, e.Graphics, ClientSize, false, 40, 60);
         UIConstructor.DrawList(e.Graphics, new Point(700, 10), "spanning tree", "", spanningTree);
         if (spanningTree.Count > 0)
             DrawSpanningTree(vertices, spanningTree, e.Graphics, ClientSize, false, 40, 60, null, null, treeEdgePen);
@@ -164,24 +165,36 @@ public class SpanningTree : Form
 
         Invalidate();
     }
-    
+
     private void KraskalsStep(List<Edge> treeEdges, List<Vertex> spanningTree, ref int step)
     {
-        if (!spanningTree.Contains(treeEdges[step].from))
+        if (step >= treeEdges.Count)
         {
-            Console.WriteLine(treeEdges.Count());
-            Vertex from = new Vertex(treeEdges[step].from.index);
-            from.center = treeEdges[step].from.center;
+            weightSum = WeightSum(spanningTree);
+            Console.WriteLine(weightSum);
+            return;
+        }
 
-            Vertex to = new Vertex(treeEdges[step].to.index);
-            to.center = treeEdges[step].to.center;
+        int s = step;
+        Edge edge = treeEdges[s];
 
-            from.next.Add(to);
-
+        Vertex from = spanningTree.Find(v => v.index == edge.from.index);
+        if (from == null)
+        {
+            from = new Vertex(edge.from.index);
+            from.center = edge.from.center;
             spanningTree.Add(from);
         }
 
-        // spanningTree[].next.Add();
+        Vertex to = spanningTree.Find(v => v.index == edge.to.index);
+        if (to == null)
+        {
+            to = new Vertex(edge.to.index);
+            to.center = edge.to.center;
+            spanningTree.Add(to);
+        }
+
+        from.next.Add(to);
 
         step++;
         Invalidate();
@@ -261,16 +274,16 @@ public class SpanningTree : Form
                 fontBrushes.Add(fontColor, new SolidBrush(fontColor));
             }
 
-            graphics.FillEllipse(solidBrush, vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
+            graphics.FillEllipse(solidBrush, spanningTree[x].center.X - vertexRadius, spanningTree[x].center.Y - vertexRadius,
                 2 * vertexRadius, 2 * vertexRadius);
 
-            graphics.DrawEllipse(treeVertexPen, vertices[x].center.X - vertexRadius, vertices[x].center.Y - vertexRadius,
+            graphics.DrawEllipse(treeVertexPen, spanningTree[x].center.X - vertexRadius, spanningTree[x].center.Y - vertexRadius,
                 2 * vertexRadius, 2 * vertexRadius);
 
             SizeF textSize = graphics.MeasureString(spanningTree[x].index.ToString(), font);
-            graphics.DrawString(vertices[x].index.ToString(), font, fontBrushes[fontColor],
-                vertices[x].center.X - textSize.Width / 2,
-                vertices[x].center.Y - textSize.Height / 2);
+            graphics.DrawString(spanningTree[x].index.ToString(), font, fontBrushes[fontColor],
+                spanningTree[x].center.X - textSize.Width / 2,
+                spanningTree[x].center.Y - textSize.Height / 2);
         }
 
         FollowEdges(vertices, spanningTree, graphics, pen, vertexRadius, directed);
@@ -283,35 +296,33 @@ public class SpanningTree : Form
         {
             foreach (var v in followV[x].next)
             {
-                if (vertices[x] == v)
+                if (followV[x].index == v.index)
                 {
                     graphics.DrawEllipse(pen,
-                    vertices[x].center.X,
-                    vertices[x].center.Y - vertexRadius * 2,
+                    followV[x].center.X,
+                    followV[x].center.Y - vertexRadius * 2,
                     vertexRadius, vertexRadius);
                     continue;
                 }
 
                 float angle = MathF.Atan2(
-                    v.center.Y - vertices[x].center.Y,
-                    v.center.X - vertices[x].center.X
+                    v.center.Y - followV[x].center.Y,
+                    v.center.X - followV[x].center.X
                 );
 
                 Point start = new Point(
-                    vertices[x].center.X + (int)(vertexRadius * MathF.Cos(angle)),
-                    vertices[x].center.Y + (int)(vertexRadius * MathF.Sin(angle))
+                    followV[x].center.X + (int)(vertexRadius * MathF.Cos(angle)),
+                    followV[x].center.Y + (int)(vertexRadius * MathF.Sin(angle))
                 );
                 Point end = new Point(
                     v.center.X - (int)(vertexRadius * MathF.Cos(angle)),
                     v.center.Y - (int)(vertexRadius * MathF.Sin(angle))
                 );
-                Point?[] breaks = new Point?[vertices.Count]; // type List<> suits the use case better 
+                Point?[] breaks = new Point?[vertices.Count];
 
-                // find any possible intersection points and offset them
-                // to store as a break
                 for (int z = 0; z < vertices.Count; z++)
                 {
-                    if (z == x || z == v.index - 1) continue;
+                    if (vertices[z].index == followV[x].index || vertices[z].index == v.index) continue;
 
                     Point? intersection = GraphConstructor.LineIntersectsCircle(start, end, vertices[z]);
                     if (intersection.HasValue)
@@ -353,5 +364,18 @@ public class SpanningTree : Form
                     GraphConstructor.DrawBrokenLine(graphics, pen, start, breaks, end);
             }
         }
+    }
+
+    private static double WeightSum(List<Vertex> spanningTree)
+    {
+        double sumW = 0;
+
+        foreach (Vertex v in spanningTree)
+        {
+            foreach ((Vertex q, double w) in v.nextV)
+                sumW += w;
+        }
+
+        return sumW;
     }
 }
