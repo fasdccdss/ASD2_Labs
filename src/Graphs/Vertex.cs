@@ -26,8 +26,8 @@ public class Vertex
 
     // in lab 6 it is best for collections "previous" and "next" to be Dictionaries,
     // as we would be able to store both the next Vertex and its Weight in relation to *this* vertex
-    public Dictionary<Vertex, double> previousV;
-    public Dictionary<Vertex, double> nextV;
+    public Dictionary<Vertex, double> previousV = new Dictionary<Vertex, double>();
+    public Dictionary<Vertex, double> nextV = new Dictionary<Vertex, double>();
 
     public Point center;
     public int radius;

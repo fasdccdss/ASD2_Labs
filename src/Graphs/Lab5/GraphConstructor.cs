@@ -170,6 +170,9 @@ public class GraphConstructor
             {
                 if (matrix[x, y] == 1 && !cycledPairs.Contains((y, x)))
                 {
+                    vertices[x].next.Add(vertices[y]);
+                    vertices[y].previous.Add(vertices[x]);
+
                     vertices[x].nextV.Add(vertices[y], weightMatrix[x, y]);
                     vertices[y].previousV.Add(vertices[x], weightMatrix[y, x]);
 
@@ -182,7 +185,7 @@ public class GraphConstructor
     }
 
     /* DRAWING EDGES */
-    private static void DrawEdges(Graphics graphics, Pen pen, List<Vertex> vertices,
+    public static void DrawEdges(Graphics graphics, Pen pen, List<Vertex> vertices,
         int vertexRadius, bool directed)
     {
         for (int x = 0; x < vertices.Count; x++)
@@ -260,7 +263,7 @@ public class GraphConstructor
             }
         }
     }
-    private static Point? LineIntersectsCircle(Point a, Point b, Vertex v)
+    public static Point? LineIntersectsCircle(Point a, Point b, Vertex v)
     {
         float dx = b.X - a.X;
         float dy = b.Y - a.Y;
@@ -284,7 +287,7 @@ public class GraphConstructor
         );
     }
 
-    private static void DrawBrokenArrow(Graphics graphics, Pen linePen,
+    public static void DrawBrokenArrow(Graphics graphics, Pen linePen,
         Point start, Point?[] breaks, Point end, Pen arrowPen = null)
     {
         if (arrowPen == null)
@@ -306,7 +309,7 @@ public class GraphConstructor
         graphics.DrawLine(linePen, lastPoint, end);
         ArrowHead(graphics, arrowPen, arrowAngle, end);
     }
-    private static void DrawBrokenLine(Graphics graphics, Pen pen,
+    public static void DrawBrokenLine(Graphics graphics, Pen pen,
     Point start, Point?[] breaks, Point end)
     {
         Point lastPoint = start;
