@@ -171,7 +171,7 @@ public class SpanningTree : Form
         if (step >= treeEdges.Count)
         {
             weightSum = WeightSum(spanningTree);
-            Console.WriteLine(weightSum);
+            Console.WriteLine($"Сума ваг ребер знайденого мiнiмального кiстяка: {weightSum}");
             return;
         }
 
@@ -195,6 +195,7 @@ public class SpanningTree : Form
         }
 
         from.next.Add(to);
+        from.nextV[to] = edge.weight;
 
         step++;
         Invalidate();
